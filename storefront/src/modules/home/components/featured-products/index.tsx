@@ -10,30 +10,32 @@ export default async function FeaturedProducts({
   collections: HttpTypes.StoreCollection[]
   region: HttpTypes.StoreRegion
 }) {
-  const collection = collections[0]
-  if (!collection) {
-    return null
-  }
-
+  // Let's fetch all products without locking to a single collection
+  // so that any 4 products in the store will show up on the homepage.
   const {
     response: { products: pricedProducts },
   } = await listProducts({
     regionId: region.id,
     queryParams: {
-      collection_id: collection.id,
       fields: "*variants.calculated_price",
+      limit: 4,
     },
   })
 
-  if (!pricedProducts) {
+  // We can still use the first collection link for the "View all" button, 
+  // or default to "/store" if no collections exist.
+  const collection = collections && collections[0]
+  const viewAllLink = collection ? `/collections/${collection.handle}` : "/store"
+
+  if (!pricedProducts || pricedProducts.length === 0) {
     return null
   }
 
   const displayProducts = pricedProducts.slice(0, 4)
 
   return (
-    <section className="py-[100px] px-20">
-      <div className="flex justify-between items-end mb-14">
+    <section className="py-12 md:py-[100px] px-6 md:px-12 lg:px-20">
+      <div className="flex flex-col md:flex-row md:justify-between items-start md:items-end gap-4 md:gap-0 mb-10 md:mb-14">
         <div>
           <span className="text-[#C9877A] text-[11px] uppercase tracking-[3px] border-l border-[#C9877A] pl-3 mb-4 block">
             Curated for you
@@ -43,7 +45,7 @@ export default async function FeaturedProducts({
           </h2>
         </div>
         <Link 
-          href={`/collections/${collection.handle}`} 
+          href={viewAllLink} 
           className="text-[12px] uppercase tracking-[2px] text-[#2E1F14]/50 hover:text-[#C9877A] mb-3 transition"
         >
           View all products &rarr;

@@ -69,7 +69,7 @@ export default function SkincareProductCard({
       </div>
 
       <div>
-        <h3 className="font-serif text-[20px] text-[#3A2820]">{product.title}</h3>
+        <h3 className="font-serif text-[16px] md:text-[20px] text-[#3A2820]">{product.title}</h3>
         <p className="text-[12px] text-[#2E1F14]/50 mb-[10px]">
           {firstTag}
         </p>

@@ -45,10 +45,10 @@ const HeroSection = () => {
           animation-delay: 2s;
         }
       `}</style>
-      <div className="min-h-[50vh] grid grid-cols-2 pt-[72px]">
+      <div className="min-h-[50vh] grid grid-cols-1 lg:grid-cols-2 pt-[72px]">
         {/* LEFT COLUMN */}
         <div
-          className={`flex flex-col justify-center px-10 py-6 opacity-0 ${
+          className={`flex flex-col justify-center px-6 md:px-12 lg:px-20 py-12 lg:py-20 opacity-0 ${
             isMounted ? "animate-fade-up" : ""
           }`}
         >
@@ -94,8 +94,8 @@ const HeroSection = () => {
         </div>
 
         {/* RIGHT COLUMN */}
-        <div className="overflow-hidden">
-          <div className="relative h-full w-full" style={{ background: 'linear-gradient(135deg, #E8D5C4 0%, #D4B89A 40%, #C9987A 100%)' }}>
+        <div className="overflow-hidden min-h-[400px] lg:min-h-0">
+          <div className="relative h-full w-full py-20 lg:py-0" style={{ background: 'linear-gradient(135deg, #E8D5C4 0%, #D4B89A 40%, #C9987A 100%)' }}>
             
             {/* Decorative Circles */}
             <div className="absolute top-[15%] left-[20%] w-64 h-64 rounded-full bg-white/15 blur-sm mix-blend-overlay"></div>

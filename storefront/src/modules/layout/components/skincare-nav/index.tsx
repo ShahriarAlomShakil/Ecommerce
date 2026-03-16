@@ -17,6 +17,7 @@ const navLinks = [
 
 export default function SkincareNav({ cartCount = 0 }: SkincareNavProps) {
   const [scrolled, setScrolled] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     const onScroll = () => {
@@ -32,22 +33,42 @@ export default function SkincareNav({ cartCount = 0 }: SkincareNavProps) {
   }, [])
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 h-[72px] flex items-center justify-between px-12 transition-colors duration-300 ${
-        scrolled
-          ? "bg-[#FAF6F0]/90 backdrop-blur-md border-b border-[#D4B89A]/20"
-          : "bg-transparent"
-      }`}
-    >
-      <LocalizedClientLink
-        href="/"
-        className="font-serif tracking-[4px] uppercase text-[#3A2820] text-[22px]"
-        data-testid="nav-store-link"
+    <>
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 h-[72px] flex items-center justify-between px-6 md:px-12 transition-colors duration-300 ${
+          scrolled
+            ? "bg-[#FAF6F0]/90 backdrop-blur-md border-b border-[#D4B89A]/20"
+            : "bg-transparent"
+        }`}
       >
-        LU
-        <span className="text-[#C9877A]">M</span>
-        ERA
-      </LocalizedClientLink>
+        <div className="flex items-center gap-4">
+          {/* Mobile Hamburger Button */}
+          <button
+            className="md:hidden text-[#2E1F14]/80 hover:text-[#C9877A] transition z-50"
+            aria-label="Toggle menu"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? (
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              </svg>
+            )}
+          </button>
+
+          <LocalizedClientLink
+            href="/"
+            className="font-serif tracking-[4px] uppercase text-[#3A2820] text-[22px]"
+            data-testid="nav-store-link"
+          >
+            LU
+            <span className="text-[#C9877A]">M</span>
+            ERA
+          </LocalizedClientLink>
+        </div>
 
       <nav className="hidden md:flex items-center gap-8">
         {navLinks.map((link) => (
@@ -85,13 +106,37 @@ export default function SkincareNav({ cartCount = 0 }: SkincareNavProps) {
         </button>
 
         <LocalizedClientLink
-          href="/cart"
-          data-testid="nav-cart-link"
-          className="bg-[#3A2820] text-[#FAF6F0] rounded-full px-5 py-2 text-[11px] uppercase tracking-[1.5px] hover:bg-[#C9877A] transition"
-        >
-          Cart ({cartCount})
-        </LocalizedClientLink>
+            href="/cart"
+            data-testid="nav-cart-link"
+            className="bg-[#3A2820] text-[#FAF6F0] rounded-full px-5 py-2 text-[11px] uppercase tracking-[1.5px] hover:bg-[#C9877A] transition"
+          >
+            <span className="hidden md:inline">Cart ({cartCount})</span>
+            <span className="md:hidden">({cartCount})</span>
+          </LocalizedClientLink>
+        </div>
+      </header>
+
+      {/* Mobile Menu Overlay */}
+      <div 
+        className={`fixed inset-0 bg-[#FAF6F0] z-40 transition-all duration-500 ease-in-out md:hidden ${
+          isMobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        <div className="flex flex-col items-center justify-center h-full gap-8">
+          {navLinks.map((link) => (
+            <LocalizedClientLink
+              key={link.label}
+              href={link.href}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={`font-serif text-3xl text-[#3A2820] transition-all duration-500 delay-100 ${
+                isMobileMenuOpen ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+              }`}
+            >
+              {link.label}
+            </LocalizedClientLink>
+          ))}
+        </div>
       </div>
-    </header>
+    </>
   )
 }
