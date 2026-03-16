@@ -2,7 +2,9 @@ import { HttpTypes } from "@medusajs/types"
 import { NextRequest, NextResponse } from "next/server"
 
 const BACKEND_URL = process.env.MEDUSA_BACKEND_URL
-const PUBLISHABLE_API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
+const PUBLISHABLE_API_KEY =
+  process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY ??
+  process.env.MEDUSA_PUBLISHABLE_KEY
 const DEFAULT_REGION = process.env.NEXT_PUBLIC_DEFAULT_REGION || "us"
 
 const regionMapCache = {
@@ -19,6 +21,12 @@ async function getRegionMap(cacheId: string) {
     )
   }
 
+  if (!PUBLISHABLE_API_KEY) {
+    throw new Error(
+      "Middleware.ts: Missing publishable key. Set NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY (or MEDUSA_PUBLISHABLE_KEY) in storefront/.env.local."
+    )
+  }
+
   if (
     !regionMap.keys().next().value ||
     regionMapUpdated < Date.now() - 3600 * 1000
@@ -26,7 +34,7 @@ async function getRegionMap(cacheId: string) {
     // Fetch regions from Medusa. We can't use the JS client here because middleware is running on Edge and the client needs a Node environment.
     const { regions } = await fetch(`${BACKEND_URL}/store/regions`, {
       headers: {
-        "x-publishable-api-key": PUBLISHABLE_API_KEY!,
+        "x-publishable-api-key": PUBLISHABLE_API_KEY,
       },
       next: {
         revalidate: 3600,
@@ -34,10 +42,17 @@ async function getRegionMap(cacheId: string) {
       },
       cache: "force-cache",
     }).then(async (response) => {
-      const json = await response.json()
+      let json: { message?: string } = {}
+
+      try {
+        json = await response.json()
+      } catch {}
 
       if (!response.ok) {
-        throw new Error(json.message)
+        throw new Error(
+          json.message ||
+            `Failed to fetch regions (${response.status} ${response.statusText})`
+        )
       }
 
       return json
@@ -112,9 +127,18 @@ export async function middleware(request: NextRequest) {
 
   let cacheId = cacheIdCookie?.value || crypto.randomUUID()
 
-  const regionMap = await getRegionMap(cacheId)
+  let countryCode: string | undefined
 
-  const countryCode = regionMap && (await getCountryCode(request, regionMap))
+  try {
+    const regionMap = await getRegionMap(cacheId)
+    countryCode = regionMap && (await getCountryCode(request, regionMap))
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("Middleware.ts: Falling back to default region.", error)
+    }
+
+    countryCode = DEFAULT_REGION
+  }
 
   const urlHasCountryCode =
     countryCode && request.nextUrl.pathname.split("/")[1].includes(countryCode)

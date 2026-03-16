@@ -32,6 +32,38 @@
   </a>
 </p>
 
+## Admin Dashboard Quick Setup
+
+Medusa Admin is included out of the box in this backend.
+
+1. Ensure your database URL is configured in `.env` (`DATABASE_URL`).
+2. Run one-time admin setup:
+
+```bash
+npm run admin:setup
+```
+
+This command runs DB setup and creates an admin user with:
+
+- Email: `admin@medusa-test.com`
+- Password: `supersecret`
+
+You can also create a custom admin user:
+
+```bash
+npm run admin:create-user -- -e you@example.com -p yourpassword
+```
+
+3. Start Medusa:
+
+```bash
+npm run dev
+```
+
+4. Open Admin at:
+
+`http://localhost:9000/app`
+
 ## Compatibility
 
 This starter is compatible with versions >= 2 of `@medusajs/medusa`. 

@@ -1,6 +1,33 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap");
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
+
+:root {
+  --brand-cream: #faf6f0;
+  --brand-blush: #e8c4b0;
+  --brand-rose: #c9877a;
+  --brand-sage: #8a9f87;
+  --brand-earth: #3a2820;
+  --brand-sand: #d4b89a;
+  --brand-mist: #f2ede6;
+  --brand-text: #2e1f14;
+}
+
+body {
+  background-color: #faf6f0;
+  color: #2e1f14;
+}
+
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.4;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
 
 @layer utilities {
   /* Chrome, Safari and Opera */

@@ -1,4 +1,5 @@
 const path = require("path")
+const defaultTheme = require("tailwindcss/defaultTheme")
 
 module.exports = {
   darkMode: "class",
@@ -34,6 +35,14 @@ module.exports = {
           80: "#1F2937",
           90: "#111827",
         },
+        "brand-cream": "#FAF6F0",
+        "brand-blush": "#E8C4B0",
+        "brand-rose": "#C9877A",
+        "brand-sage": "#8A9F87",
+        "brand-earth": "#3A2820",
+        "brand-sand": "#D4B89A",
+        "brand-mist": "#F2EDE6",
+        "brand-text": "#2E1F14",
       },
       borderRadius: {
         none: "0px",
@@ -59,16 +68,8 @@ module.exports = {
         "3xl": "2rem",
       },
       fontFamily: {
-        sans: [
-          "Inter",
-          "-apple-system",
-          "BlinkMacSystemFont",
-          "Segoe UI",
-          "Roboto",
-          "Helvetica Neue",
-          "Ubuntu",
-          "sans-serif",
-        ],
+        serif: ["Cormorant Garamond", ...defaultTheme.fontFamily.serif],
+        sans: ["DM Sans", ...defaultTheme.fontFamily.sans],
       },
       keyframes: {
         ring: {
