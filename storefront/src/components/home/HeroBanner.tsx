@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { AnimatePresence, motion } from "framer-motion"
+import { motion } from "framer-motion"
 import useEmblaCarousel from "embla-carousel-react"
 import AutoPlay from "embla-carousel-autoplay"
 import { ChevronLeft, ChevronRight } from "lucide-react"
@@ -49,80 +49,121 @@ export default function HeroBanner({ className }: HeroBannerProps) {
 
   return (
     <section className={cn("relative w-full overflow-hidden", className)}>
-      {/* Embla Container */}
-      <div ref={emblaRef} className="w-full overflow-hidden">
-        <div className="flex">
-          {/* Slide 1: 60/40 Split Layout */}
-          <div className="min-w-full flex-shrink-0">
-            <HeroSlide1 />
-          </div>
+      <div className="md:hidden">
+        <HeroMobile />
+      </div>
 
-          {/* Slide 2: Full-width Overlay */}
-          <div className="min-w-full flex-shrink-0">
-            <HeroSlide2 />
-          </div>
+      <div className="hidden md:block">
+        {/* Embla Container */}
+        <div ref={emblaRef} className="w-full overflow-hidden">
+          <div className="flex">
+            {/* Slide 1: 60/40 Split Layout */}
+            <div className="min-w-full flex-shrink-0">
+              <HeroSlide1 />
+            </div>
 
-          {/* Slide 3: Grid Layout */}
-          <div className="min-w-full flex-shrink-0">
-            <HeroSlide3 />
+            {/* Slide 2: Full-width Overlay */}
+            <div className="min-w-full flex-shrink-0">
+              <HeroSlide2 />
+            </div>
+
+            {/* Slide 3: Grid Layout */}
+            <div className="min-w-full flex-shrink-0">
+              <HeroSlide3 />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Navigation Arrows (Desktop only) */}
-      <div className="absolute inset-0 pointer-events-none flex items-center justify-between px-6 md:pointer-events-auto">
-        <button
-          className={cn(
-            "pointer-events-auto p-3 rounded-full transition-all",
-            "hidden md:flex items-center justify-center",
-            "bg-white/80 dark:bg-black/40 hover:bg-white dark:hover:bg-black/60",
-            "text-black dark:text-white",
-            !canScrollPrev && "opacity-50 cursor-not-allowed"
-          )}
-          onClick={scrollPrev}
-          disabled={!canScrollPrev}
-        >
-          <ChevronLeft size={24} />
-        </button>
-
-        <button
-          className={cn(
-            "pointer-events-auto p-3 rounded-full transition-all",
-            "hidden md:flex items-center justify-center",
-            "bg-white/80 dark:bg-black/40 hover:bg-white dark:hover:bg-black/60",
-            "text-black dark:text-white",
-            !canScrollNext && "opacity-50 cursor-not-allowed"
-          )}
-          onClick={scrollNext}
-          disabled={!canScrollNext}
-        >
-          <ChevronRight size={24} />
-        </button>
-      </div>
-
-      {/* Dot Indicators */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex gap-2">
-        {slides.map((_, index) => (
-          <motion.button
-            key={index}
-            onClick={() => emblaApi?.scrollTo(index)}
-            initial={{ opacity: 0.4, width: "8px" }}
-            animate={{
-              opacity: index === selectedIndex ? 1 : 0.4,
-              width: index === selectedIndex ? "24px" : "8px",
-            }}
-            transition={{ duration: 0.3 }}
+        {/* Navigation Arrows (Desktop only) */}
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-between px-6 md:pointer-events-auto">
+          <button
             className={cn(
-              "h-2 rounded-full transition-colors",
-              index === selectedIndex
-                ? "bg-white"
-                : "bg-white/50 hover:bg-white/70"
+              "pointer-events-auto p-3 rounded-full transition-all",
+              "hidden md:flex items-center justify-center",
+              "bg-white/80 dark:bg-black/40 hover:bg-white dark:hover:bg-black/60",
+              "text-black dark:text-white",
+              !canScrollPrev && "opacity-50 cursor-not-allowed"
             )}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
+            onClick={scrollPrev}
+            disabled={!canScrollPrev}
+          >
+            <ChevronLeft size={24} />
+          </button>
+
+          <button
+            className={cn(
+              "pointer-events-auto p-3 rounded-full transition-all",
+              "hidden md:flex items-center justify-center",
+              "bg-white/80 dark:bg-black/40 hover:bg-white dark:hover:bg-black/60",
+              "text-black dark:text-white",
+              !canScrollNext && "opacity-50 cursor-not-allowed"
+            )}
+            onClick={scrollNext}
+            disabled={!canScrollNext}
+          >
+            <ChevronRight size={24} />
+          </button>
+        </div>
+
+        {/* Dot Indicators */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex gap-2">
+          {slides.map((_, index) => (
+            <motion.button
+              key={index}
+              onClick={() => emblaApi?.scrollTo(index)}
+              initial={{ opacity: 0.4, width: "8px" }}
+              animate={{
+                opacity: index === selectedIndex ? 1 : 0.4,
+                width: index === selectedIndex ? "24px" : "8px",
+              }}
+              transition={{ duration: 0.3 }}
+              className={cn(
+                "h-2 rounded-full transition-colors",
+                index === selectedIndex
+                  ? "bg-white"
+                  : "bg-white/50 hover:bg-white/70"
+              )}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
       </div>
     </section>
+  )
+}
+
+function HeroMobile() {
+  return (
+    <div className="relative min-h-[540px] overflow-hidden bg-surface dark:bg-surface">
+      <div className="absolute inset-0">
+        <img
+          src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=900&h=1200&fit=crop"
+          alt="Mobile Hero"
+          className="h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/40 to-black/60 dark:from-black/45 dark:via-black/60 dark:to-black/75" />
+      </div>
+
+      <div className="relative z-10 flex min-h-[540px] flex-col justify-end px-5 pb-8">
+        <span className="mb-3 inline-block w-fit rounded-full border border-white/30 bg-white/15 px-3 py-1 text-xs uppercase tracking-wide text-white">
+          New Collection 2025
+        </span>
+        <h2 className="font-display text-4xl leading-tight text-white">
+          Glass Skin Starts Here
+        </h2>
+        <p className="mt-3 max-w-sm text-sm text-white/85">
+          Discover authentic COSRX, Laneige & more — delivered across Bangladesh
+        </p>
+        <div className="mt-5 flex gap-3">
+          <button className="rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-white">
+            Shop Now
+          </button>
+          <button className="rounded-full border border-white/60 px-5 py-2.5 text-sm font-medium text-white">
+            Explore Brands
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -327,7 +368,7 @@ function HeroSlide3() {
           className="relative overflow-hidden rounded-lg"
         >
           <img
-            src="https://images.unsplash.com/photo-1585314063955-b76191c69a37?w=600&h=300&fit=crop"
+            src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=900&h=600&fit=crop"
             alt="Sunscreen Product 1"
             className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
           />
