@@ -197,22 +197,20 @@ function HeroSlide1() {
 
       {/* Right Image Panel (40% on desktop, 100% on mobile) */}
       <div className="w-full md:w-2/5 relative h-80 md:h-auto order-1 md:order-2 overflow-hidden">
-        <>
-          {/* Placeholder Image */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-primary/40 to-secondary/20 dark:from-primary/30 dark:to-secondary/15">
-            <img
-              src="https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=800&h=800&fit=crop"
-              alt="Glass Skin Product"
-              className="w-full h-full object-cover"
-            />
-          </div>
+        {/* Placeholder Image */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-primary/40 to-secondary/20 dark:from-primary/30 dark:to-secondary/15">
+          <img
+            src="https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=800&h=800&fit=crop"
+            alt="Glass Skin Product"
+            className="w-full h-full object-cover"
+          />
+        </div>
 
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-primary/20 dark:to-primary/10 pointer-events-none" />
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-primary/20 dark:to-primary/10 pointer-events-none" />
 
-          {/* Soft Peach/Pink Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-radial from-[#F2A7B3]/15 dark:from-[#FF8FA3]/10 to-transparent pointer-events-none" />
-        </>
+        {/* Soft Peach/Pink Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-radial from-[#F2A7B3]/15 dark:from-[#FF8FA3]/10 to-transparent pointer-events-none" />
       </div>
     </div>
   )
@@ -329,7 +327,16 @@ function HeroSlide3() {
           className="relative overflow-hidden rounded-lg"
         >
           <img
-              src="https://images.unsplash.com/photo-1585314063955-b76191c69a37?w=600&h=300&fit=crop"
+            src="https://images.unsplash.com/photo-1585314063955-b76191c69a37?w=600&h=300&fit=crop"
+            alt="Sunscreen Product 1"
+            className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+          />
+        </motion.div>
+
+        {/* Bottom Image */}
+        <motion.div
+          initial={{ opacity: 0, x: 40 }}
+          whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
           viewport={{ once: true }}
           className="relative overflow-hidden rounded-lg"
