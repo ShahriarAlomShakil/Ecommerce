@@ -7,6 +7,7 @@ import PromoBanner from "@components/home/PromoBanner"
 import SkinConcernFinder from "@components/home/SkinConcernFinder"
 import TrendingNow from "@components/home/TrendingNow"
 import EditorialSection from "@components/home/EditorialSection"
+import Testimonials from "@components/home/Testimonials"
 
 export const metadata: Metadata = {
   title: "GlowHaus BD - Korean Skincare for Bangladesh",
@@ -43,6 +44,9 @@ export default async function Home(props: {
 
       {/* Skin Concern Finder */}
       <SkinConcernFinder />
+
+      {/* Reviews / Testimonials */}
+      <Testimonials />
     </>
   )
 }
