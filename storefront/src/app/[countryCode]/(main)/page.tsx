@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import BrandStrip from "@components/home/BrandStrip"
 import HeroBanner from "@components/home/HeroBanner"
 
 export const metadata: Metadata = {
@@ -15,6 +16,9 @@ export default async function Home(props: {
     <>
       {/* Hero Banner Carousel */}
       <HeroBanner />
+
+      {/* Brand Logo Strip */}
+      <BrandStrip />
 
       {/* Placeholder for upcoming sections */}
       <section className="glowhaus-container py-16">
