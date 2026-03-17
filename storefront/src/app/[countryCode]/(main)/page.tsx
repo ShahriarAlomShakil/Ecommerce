@@ -1,6 +1,7 @@
 import { Metadata } from "next"
 import BrandStrip from "@components/home/BrandStrip"
 import CategoryShowcase from "@components/home/CategoryShowcase"
+import FeaturedProducts from "@components/home/FeaturedProducts"
 import HeroBanner from "@components/home/HeroBanner"
 
 export const metadata: Metadata = {
@@ -24,10 +25,13 @@ export default async function Home(props: {
       {/* Category Showcase */}
       <CategoryShowcase />
 
+      {/* Featured Products */}
+      <FeaturedProducts />
+
       {/* Placeholder for upcoming sections */}
       <section className="glowhaus-container py-16">
         <div className="rounded-card border border-border bg-bg-card p-6 text-center text-sm text-muted">
-          🏗️ More sections coming soon: Brand Strip, Categories, Featured Products, and more...
+          🏗️ More sections coming soon: Promo Banner, Trending Now, Editorial Story, and more...
         </div>
       </section>
     </>
