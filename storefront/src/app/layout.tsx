@@ -72,6 +72,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
     <html
       lang="en"
       suppressHydrationWarning
+      data-theme="light"
       className={[
         cormorantGaramond.variable,
         dmSerifDisplay.variable,

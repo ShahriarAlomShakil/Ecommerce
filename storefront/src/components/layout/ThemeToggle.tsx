@@ -3,9 +3,14 @@
 import { motion } from "framer-motion"
 import { Moon, Sun } from "lucide-react"
 
+import { cn } from "@lib/utils"
 import { useTheme } from "@providers/ThemeProvider"
 
-export default function ThemeToggle() {
+type ThemeToggleProps = {
+	className?: string
+}
+
+export default function ThemeToggle({ className }: ThemeToggleProps) {
 	const { theme, toggleTheme } = useTheme()
 	const isDark = theme === "dark"
 
@@ -15,7 +20,10 @@ export default function ThemeToggle() {
 			onClick={toggleTheme}
 			aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
 			title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-			className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-[var(--color-text)] transition hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+			className={cn(
+				"relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-[color:var(--color-bg-card)]/75 text-[var(--color-text)] shadow-sm backdrop-blur-sm transition hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+				className
+			)}
 		>
 			<motion.span
 				key={theme}

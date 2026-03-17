@@ -22,10 +22,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const stored = localStorage.getItem("glowhaus-theme") as Theme | null
-    const preferred = window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light"
-    const resolved: Theme = stored ?? preferred
+    const resolved: Theme = stored ?? "light"
     setThemeState(resolved)
     document.documentElement.setAttribute("data-theme", resolved)
     setMounted(true)

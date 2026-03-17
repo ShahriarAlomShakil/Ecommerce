@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion"
 import {
+	ChevronDown,
 	Heart,
 	Menu,
 	Search,
@@ -25,15 +26,33 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 type NavItem = {
 	label: string
 	href: string
+	hasDropdown?: boolean
+}
+
+type CategoryItem = {
+	id: string
+	name: string
+	handle: string
+	parent_category_id?: string | null
+	category_children?: CategoryItem[]
 }
 
 const NAV_ITEMS: NavItem[] = [
 	{ label: "Home", href: "/" },
 	{ label: "Shop", href: "/store" },
 	{ label: "Brands", href: "/brands" },
-	{ label: "Skin Concerns", href: "/skin-concerns" },
+	{ label: "Categories", href: "/categories", hasDropdown: true },
 	{ label: "Sale", href: "/sale" },
 	{ label: "Blog", href: "/blog" },
+]
+
+const FALLBACK_CATEGORIES: CategoryItem[] = [
+	{ id: "cleanser", name: "Cleanser", handle: "cleanser" },
+	{ id: "toner", name: "Toner", handle: "toner" },
+	{ id: "serum", name: "Serum", handle: "serum" },
+	{ id: "moisturizer", name: "Moisturizer", handle: "moisturizer" },
+	{ id: "sunscreen", name: "Sunscreen", handle: "sunscreen" },
+	{ id: "sheet-masks", name: "Sheet Masks", handle: "sheet-masks" },
 ]
 
 const SOCIAL_LINKS = [
@@ -104,11 +123,26 @@ function CountBadge({ count }: { count: number }) {
 	)
 }
 
+function normalizePath(pathname?: string | null) {
+	if (!pathname) {
+		return "/"
+	}
+
+	return pathname.replace(/^\/[a-z]{2}(?=\/|$)/, "") || "/"
+}
+
 export default function Navbar() {
 	const pathname = usePathname()
 	const [isScrolled, setIsScrolled] = useState(false)
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+	const [isMobileCategoriesOpen, setIsMobileCategoriesOpen] = useState(false)
+	const [expandedMobileCategories, setExpandedMobileCategories] = useState<Set<string>>(
+		new Set()
+	)
+	const [isDesktopCategoriesOpen, setIsDesktopCategoriesOpen] = useState(false)
 	const [isSearchOpen, setIsSearchOpen] = useState(false)
+	const [categories, setCategories] = useState<CategoryItem[]>(FALLBACK_CATEGORIES)
+	const [isCategoriesLoading, setIsCategoriesLoading] = useState(true)
 	const { count: cartCount } = useCart()
 	const { count: wishlistCount } = useWishlist()
 
@@ -129,15 +163,62 @@ export default function Navbar() {
 	}, [isMobileMenuOpen])
 
 	useEffect(() => {
-		setIsMobileMenuOpen(false)
-	}, [pathname])
+		let isMounted = true
 
-	const activeHref = useMemo(() => {
-		if (!pathname) {
-			return "/"
+		const fetchCategories = async () => {
+			try {
+				const response = await fetch("/api/categories")
+				if (!response.ok) {
+					throw new Error("Failed to fetch categories")
+				}
+
+				const data = (await response.json()) as CategoryItem[]
+				const rootCategories = data.filter((category) => !category.parent_category_id)
+
+				if (isMounted && rootCategories.length > 0) {
+					setCategories(rootCategories)
+				}
+			} catch {
+				if (isMounted) {
+					setCategories(FALLBACK_CATEGORIES)
+				}
+			} finally {
+				if (isMounted) {
+					setIsCategoriesLoading(false)
+				}
+			}
 		}
 
-		const normalizedPath = pathname.replace(/^\/[a-z]{2}(?=\/|$)/, "") || "/"
+		fetchCategories()
+
+		return () => {
+			isMounted = false
+		}
+	}, [])
+
+	useEffect(() => {
+		setIsMobileMenuOpen(false)
+		setIsMobileCategoriesOpen(false)
+		setExpandedMobileCategories(new Set())
+		setIsDesktopCategoriesOpen(false)
+	}, [pathname])
+
+	const toggleMobileCategory = (categoryId: string) => {
+		setExpandedMobileCategories((previous) => {
+			const next = new Set(previous)
+
+			if (next.has(categoryId)) {
+				next.delete(categoryId)
+			} else {
+				next.add(categoryId)
+			}
+
+			return next
+		})
+	}
+
+	const activeHref = useMemo(() => {
+		const normalizedPath = normalizePath(pathname)
 		const found = NAV_ITEMS.find((item) =>
 			item.href === "/"
 				? normalizedPath === "/"
@@ -146,6 +227,9 @@ export default function Navbar() {
 
 		return found?.href ?? ""
 	}, [pathname])
+
+	const normalizedPath = normalizePath(pathname)
+	const isCategoriesActive = normalizedPath.startsWith("/categories")
 
 	return (
 		<>
@@ -193,6 +277,108 @@ export default function Navbar() {
 					<nav className="hidden flex-1 items-center justify-center gap-2 lg:flex">
 						{NAV_ITEMS.map((item) => {
 							const isActive = activeHref === item.href
+
+							if (item.hasDropdown) {
+								return (
+									<div
+										key={item.label}
+										className="relative"
+										onMouseEnter={() => setIsDesktopCategoriesOpen(true)}
+										onMouseLeave={() => setIsDesktopCategoriesOpen(false)}
+										onFocus={() => setIsDesktopCategoriesOpen(true)}
+										onBlur={(event) => {
+											if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+												setIsDesktopCategoriesOpen(false)
+											}
+										}}
+									>
+										<LocalizedClientLink
+											href={item.href}
+											className="relative inline-flex items-center gap-1.5 px-3 py-2 font-ui text-sm text-[var(--color-text)]/85 transition hover:text-[var(--color-text)]"
+										>
+											{item.label}
+											<ChevronDown
+												className={cn(
+													"h-4 w-4 transition-transform duration-200",
+													isDesktopCategoriesOpen && "rotate-180"
+												)}
+											/>
+											{isCategoriesActive && (
+												<motion.span
+													layoutId="glowhaus-active-nav"
+													className="absolute left-3 right-3 -bottom-[1px] h-[2px] rounded-full bg-primary"
+													transition={{ type: "spring", stiffness: 500, damping: 35 }}
+												/>
+											)}
+										</LocalizedClientLink>
+
+										<AnimatePresence>
+											{isDesktopCategoriesOpen && (
+												<motion.div
+													initial={{ opacity: 0, y: 10 }}
+													animate={{ opacity: 1, y: 0 }}
+													exit={{ opacity: 0, y: 10 }}
+													transition={{ duration: 0.18, ease: "easeOut" }}
+													className="absolute left-1/2 top-full z-20 mt-3 w-[22rem] -translate-x-1/2 rounded-[24px] border border-border bg-[var(--color-bg-card)]/95 p-4 shadow-[0_24px_64px_rgba(15,23,42,0.12)] backdrop-blur-xl"
+												>
+													<div className="mb-3 flex items-center justify-between">
+														<div>
+															<p className="font-ui text-[11px] uppercase tracking-[0.22em] text-muted">
+																Shop by category
+															</p>
+															<h3 className="mt-1 font-ui text-sm font-medium text-[var(--color-text)]">
+																Find your routine faster
+															</h3>
+														</div>
+														<LocalizedClientLink
+															href="/categories"
+															className="font-ui text-xs font-medium text-primary transition hover:opacity-80"
+														>
+															View all
+														</LocalizedClientLink>
+													</div>
+
+													<div className="grid gap-2">
+														{isCategoriesLoading && categories.length === 0 ? (
+															<p className="rounded-2xl border border-border/70 px-4 py-3 text-sm text-muted">
+																Loading categories...
+															</p>
+														) : (
+															categories.slice(0, 8).map((category) => (
+																<div
+																	key={category.id}
+																	className="rounded-2xl border border-border/70 bg-[var(--color-bg)]/70 px-4 py-3 transition hover:border-primary/40 hover:bg-primary/5"
+																>
+																	<LocalizedClientLink
+																		href={`/categories/${category.handle}`}
+																		className="font-ui text-sm font-medium text-[var(--color-text)]"
+																	>
+																		{category.name}
+																	</LocalizedClientLink>
+
+																	{category.category_children && category.category_children.length > 0 && (
+																		<div className="mt-2 flex flex-wrap gap-2">
+																			{category.category_children.slice(0, 4).map((subCategory) => (
+																				<LocalizedClientLink
+																					key={subCategory.id}
+																					href={`/categories/${subCategory.handle}`}
+																					className="rounded-full border border-border bg-[var(--color-bg-card)] px-2.5 py-1 font-ui text-[11px] text-muted transition hover:border-primary/40 hover:text-[var(--color-text)]"
+																				>
+																					{subCategory.name}
+																				</LocalizedClientLink>
+																			))}
+																		</div>
+																	)}
+																</div>
+															))
+														)}
+													</div>
+												</motion.div>
+											)}
+										</AnimatePresence>
+									</div>
+								)
+							}
 
 							return (
 								<LocalizedClientLink
@@ -252,9 +438,11 @@ export default function Navbar() {
 						<ThemeToggle />
 					</div>
 
-					<div className="absolute left-1/2 -translate-x-1/2 lg:hidden">
+						<div className="absolute left-1/2 -translate-x-1/2 lg:hidden">
 						<LocalizedClientLink href="/" aria-label="Go to homepage" className="text-[var(--color-text)]">
-							<GlowHausLogo />
+								<div className="origin-center scale-[0.8] sm:scale-[0.9]">
+									<GlowHausLogo />
+								</div>
 						</LocalizedClientLink>
 					</div>
 
@@ -293,14 +481,120 @@ export default function Navbar() {
 							/>
 
 							<motion.aside
-								className="fixed inset-y-0 left-0 z-[111] flex w-full max-w-sm flex-col bg-[var(--color-nav-bg)] px-6 pb-8 pt-24 shadow-xl lg:hidden"
+								className="fixed inset-y-0 left-0 z-[111] flex w-full max-w-sm flex-col bg-[var(--color-nav-bg)] px-6 pb-8 pt-6 shadow-xl lg:hidden"
 								initial={{ x: "-100%" }}
 								animate={{ x: 0 }}
 								exit={{ x: "-100%" }}
 								transition={{ type: "spring", stiffness: 320, damping: 32 }}
 							>
+								<div className="mb-8 flex items-center justify-between">
+									<ThemeToggle className="bg-[var(--color-bg-card)]/90" />
+
+									<button
+										type="button"
+										onClick={() => setIsMobileMenuOpen(false)}
+										aria-label="Close navigation menu"
+										className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-[var(--color-bg-card)]/90 text-[var(--color-text)] shadow-sm transition hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+									>
+										<X className="h-5 w-5" />
+									</button>
+								</div>
+
 								<nav className="space-y-1">
 									{NAV_ITEMS.map((item) => {
+										if (item.hasDropdown) {
+											return (
+												<div key={item.label} className="rounded-2xl border border-border/70 bg-[var(--color-bg-card)]/45 px-3 py-2.5">
+													<button
+														type="button"
+														onClick={() => setIsMobileCategoriesOpen((previous) => !previous)}
+														className="flex w-full items-center justify-between font-ui text-base text-[var(--color-text)] transition"
+													>
+														<span>Categories</span>
+														<ChevronDown
+															className={cn(
+																"h-4 w-4 transition-transform duration-200",
+																isMobileCategoriesOpen && "rotate-180"
+															)}
+														/>
+													</button>
+
+													<AnimatePresence initial={false}>
+														{isMobileCategoriesOpen && (
+															<motion.div
+																initial={{ height: 0, opacity: 0 }}
+																animate={{ height: "auto", opacity: 1 }}
+																exit={{ height: 0, opacity: 0 }}
+																transition={{ duration: 0.2, ease: "easeOut" }}
+																className="overflow-hidden"
+															>
+																<div className="mt-3 space-y-2 border-t border-border/70 pt-3">
+																	{isCategoriesLoading && categories.length === 0 ? (
+																		<p className="px-1 text-sm text-muted">Loading categories...</p>
+																	) : (
+																		categories.map((category) => (
+																			<div key={category.id} className="rounded-xl bg-[var(--color-bg-card)]/80 px-3 py-2">
+																			<div className="flex items-center justify-between gap-3">
+																				<LocalizedClientLink
+																					href={`/categories/${category.handle}`}
+																					onClick={() => setIsMobileMenuOpen(false)}
+																					className="font-ui text-sm font-medium text-[var(--color-text)]"
+																				>
+																					{category.name}
+																				</LocalizedClientLink>
+
+																				{category.category_children && category.category_children.length > 0 && (
+																					<button
+																						type="button"
+																						onClick={() => toggleMobileCategory(category.id)}
+																						aria-label={`Toggle ${category.name} subcategories`}
+																						className="inline-flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-text)]/70 transition hover:bg-black/5"
+																					>
+																						<ChevronDown
+																							className={cn(
+																								"h-4 w-4 transition-transform duration-200",
+																								expandedMobileCategories.has(category.id) && "rotate-180"
+																							)}
+																						/>
+																					</button>
+																				)}
+																			</div>
+
+																			{category.category_children &&
+																				category.category_children.length > 0 &&
+																				expandedMobileCategories.has(category.id) && (
+																					<div className="mt-2 flex flex-wrap gap-2">
+																						{category.category_children.map((subCategory) => (
+																							<LocalizedClientLink
+																								key={subCategory.id}
+																								href={`/categories/${subCategory.handle}`}
+																								onClick={() => setIsMobileMenuOpen(false)}
+																								className="rounded-full border border-border px-2.5 py-1 font-ui text-xs text-muted transition hover:border-primary/40 hover:text-[var(--color-text)]"
+																							>
+																								{subCategory.name}
+																							</LocalizedClientLink>
+																						))}
+																					</div>
+																				)}
+																		</div>
+																		))
+																	)}
+
+																	<LocalizedClientLink
+																		href="/categories"
+																		onClick={() => setIsMobileMenuOpen(false)}
+																		className="block px-1 pt-1 font-ui text-sm font-medium text-primary"
+																	>
+																		View all categories
+																	</LocalizedClientLink>
+																</div>
+															</motion.div>
+														)}
+													</AnimatePresence>
+												</div>
+											)
+										}
+
 										const isActive = activeHref === item.href
 
 										return (
