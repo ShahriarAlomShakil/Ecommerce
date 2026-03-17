@@ -15,6 +15,7 @@ export default function MobileCategoriesMenu({
 }: MobileCategoriesMenuProps) {
   const [categories, setCategories] = useState<HttpTypes.StoreProductCategory[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false)
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set()
   )
@@ -39,6 +40,13 @@ export default function MobileCategoriesMenu({
     fetchCategories()
   }, [])
 
+  useEffect(() => {
+    if (!isOpen) {
+      setIsCategoriesOpen(false)
+      setExpandedCategories(new Set())
+    }
+  }, [isOpen])
+
   const toggleExpand = (categoryId: string) => {
     const newExpanded = new Set(expandedCategories)
     if (newExpanded.has(categoryId)) {
@@ -58,93 +66,110 @@ export default function MobileCategoriesMenu({
         }`}
       >
         <div className="flex flex-col h-full pt-24 pb-8 px-6 overflow-y-auto">
-          {/* Categories Section */}
-          <div className="mb-8">
-            <h3 className="font-serif text-[#2E1F14] text-lg mb-4">Categories</h3>
+          <div className="space-y-4">
+            <button
+              type="button"
+              onClick={() => setIsCategoriesOpen((prev) => !prev)}
+              className="w-full flex items-center justify-between font-serif text-2xl text-[#3A2820] hover:text-[#C9877A] transition"
+            >
+              Categories
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className={`w-5 h-5 transition-transform duration-200 ${
+                  isCategoriesOpen ? "rotate-180" : ""
+                }`}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                />
+              </svg>
+            </button>
 
-            {isLoading ? (
-              <div className="text-[#2E1F14]/50 text-sm">
-                Loading categories...
-              </div>
-            ) : categories.length === 0 ? (
-              <div className="text-[#2E1F14]/50 text-sm">
-                No categories available
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {categories.map((category) => (
-                  <div key={category.id}>
-                    <div className="flex items-center justify-between">
-                      <LocalizedClientLink
-                        href={`/categories/${category.handle}`}
-                        onClick={onClose}
-                        className="font-sans text-[14px] text-[#3A2820] hover:text-[#C9877A] transition py-2"
-                      >
-                        {category.name}
-                      </LocalizedClientLink>
-
-                      {category.category_children &&
-                        category.category_children.length > 0 && (
-                          <button
-                            onClick={() => toggleExpand(category.id)}
-                            className="text-[#2E1F14]/70 hover:text-[#2E1F14] transition p-1"
-                            aria-label="Toggle subcategories"
+            {isCategoriesOpen && (
+              <div className="pl-2 space-y-2 border-l border-[#D4B89A]/20">
+                {isLoading ? (
+                  <div className="text-[#2E1F14]/50 text-sm py-1">Loading categories...</div>
+                ) : categories.length === 0 ? (
+                  <div className="text-[#2E1F14]/50 text-sm py-1">No categories available</div>
+                ) : (
+                  <>
+                    {categories.map((category) => (
+                      <div key={category.id}>
+                        <div className="flex items-center justify-between">
+                          <LocalizedClientLink
+                            href={`/categories/${category.handle}`}
+                            onClick={onClose}
+                            className="font-sans text-[14px] text-[#3A2820] hover:text-[#C9877A] transition py-1.5"
                           >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth={1.5}
-                              stroke="currentColor"
-                              className={`w-4 h-4 transition-transform duration-200 ${
-                                expandedCategories.has(category.id)
-                                  ? "rotate-180"
-                                  : ""
-                              }`}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="m19.5 8.25-7.5 7.5-7.5-7.5"
-                              />
-                            </svg>
-                          </button>
-                        )}
-                    </div>
+                            {category.name}
+                          </LocalizedClientLink>
 
-                    {/* Subcategories */}
-                    {category.category_children &&
-                      category.category_children.length > 0 &&
-                      expandedCategories.has(category.id) && (
-                        <div className="pl-4 space-y-1 mt-1">
-                          {category.category_children.map((subcat) => (
-                            <LocalizedClientLink
-                              key={subcat.id}
-                              href={`/categories/${subcat.handle}`}
-                              onClick={onClose}
-                              className="block font-sans text-[13px] text-[#2E1F14]/70 hover:text-[#C9877A] transition py-1.5"
-                            >
-                              {subcat.name}
-                            </LocalizedClientLink>
-                          ))}
+                          {category.category_children &&
+                            category.category_children.length > 0 && (
+                              <button
+                                onClick={() => toggleExpand(category.id)}
+                                className="text-[#2E1F14]/70 hover:text-[#2E1F14] transition p-1"
+                                aria-label="Toggle subcategories"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  strokeWidth={1.5}
+                                  stroke="currentColor"
+                                  className={`w-4 h-4 transition-transform duration-200 ${
+                                    expandedCategories.has(category.id)
+                                      ? "rotate-180"
+                                      : ""
+                                  }`}
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                                  />
+                                </svg>
+                              </button>
+                            )}
                         </div>
-                      )}
-                  </div>
-                ))}
 
-                <LocalizedClientLink
-                  href="/categories"
-                  onClick={onClose}
-                  className="block font-sans text-[13px] text-[#C9877A] hover:text-[#2E1F14] transition py-2 border-t border-[#D4B89A]/20 mt-4 pt-4 font-medium"
-                >
-                  View All Categories
-                </LocalizedClientLink>
+                        {category.category_children &&
+                          category.category_children.length > 0 &&
+                          expandedCategories.has(category.id) && (
+                            <div className="pl-4 space-y-1 mt-0.5">
+                              {category.category_children.map((subcat) => (
+                                <LocalizedClientLink
+                                  key={subcat.id}
+                                  href={`/categories/${subcat.handle}`}
+                                  onClick={onClose}
+                                  className="block font-sans text-[13px] text-[#2E1F14]/70 hover:text-[#C9877A] transition py-1"
+                                >
+                                  {subcat.name}
+                                </LocalizedClientLink>
+                              ))}
+                            </div>
+                          )}
+                      </div>
+                    ))}
+
+                    <LocalizedClientLink
+                      href="/categories"
+                      onClick={onClose}
+                      className="block font-sans text-[13px] text-[#C9877A] hover:text-[#2E1F14] transition py-2 border-t border-[#D4B89A]/20 mt-2 pt-3 font-medium"
+                    >
+                      View All Categories
+                    </LocalizedClientLink>
+                  </>
+                )}
               </div>
             )}
-          </div>
 
-          {/* Other Navigation Links */}
-          <div className="space-y-4">
             <LocalizedClientLink
               href="/store"
               onClick={onClose}
