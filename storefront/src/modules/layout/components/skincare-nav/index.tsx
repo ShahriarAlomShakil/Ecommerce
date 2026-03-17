@@ -1,6 +1,7 @@
 "use client"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import CategoriesDropdown from "./categories-dropdown"
 import { useEffect, useState } from "react"
 
 type SkincareNavProps = {
@@ -8,7 +9,6 @@ type SkincareNavProps = {
 }
 
 const navLinks = [
-  { label: "Collections", href: "/collections" },
   { label: "Skincare", href: "/store" },
   { label: "Ingredients", href: "/store" },
   { label: "Rituals", href: "/store" },
@@ -71,6 +71,7 @@ export default function SkincareNav({ cartCount = 0 }: SkincareNavProps) {
         </div>
 
       <nav className="hidden md:flex items-center gap-8">
+        <CategoriesDropdown />
         {navLinks.map((link) => (
           <LocalizedClientLink
             key={link.label}

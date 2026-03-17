@@ -11,6 +11,7 @@ import {
 } from "@medusajs/framework/workflows-sdk";
 import {
   createApiKeysWorkflow,
+  createCollectionsWorkflow,
   createInventoryLevelsWorkflow,
   createProductCategoriesWorkflow,
   createProductsWorkflow,
@@ -20,12 +21,21 @@ import {
   createShippingProfilesWorkflow,
   createStockLocationsWorkflow,
   createTaxRegionsWorkflow,
+  deleteCollectionsWorkflow,
+  deleteProductCategoriesWorkflow,
+  deleteProductsWorkflow,
+  deleteRegionsWorkflow,
+  deleteShippingOptionsWorkflow,
+  deleteTaxRegionsWorkflow,
   linkSalesChannelsToApiKeyWorkflow,
   linkSalesChannelsToStockLocationWorkflow,
   updateStoresStep,
   updateStoresWorkflow,
 } from "@medusajs/medusa/core-flows";
 import { ApiKey } from "../../.medusa/types/query-entry-points";
+
+const PRODUCT_IMAGE_PATH =
+  "/home/shakil/Desktop/E-commerce/On-the-body-Rice-Therapy-Artemisia-pH-Balance-Cleanser-150-ml-3.jpg";
 
 const updateStoreCurrencies = createWorkflow(
   "update-store-currencies",
@@ -55,6 +65,96 @@ const updateStoreCurrencies = createWorkflow(
   }
 );
 
+async function clearPreviousSeedData(container: ExecArgs["container"], logger: any, query: any) {
+  logger.info("Clearing previously seeded data...");
+
+  const { data: shippingOptions } = await query.graph({
+    entity: "shipping_option",
+    fields: ["id"],
+  });
+
+  if (shippingOptions?.length) {
+    await deleteShippingOptionsWorkflow(container).run({
+      input: {
+        ids: shippingOptions.map((item: { id: string }) => item.id),
+      },
+    });
+  }
+
+  const { data: taxRegions } = await query.graph({
+    entity: "tax_region",
+    fields: ["id", "parent_id"],
+  });
+
+  if (taxRegions?.length) {
+    const sortedTaxRegionIds = [...taxRegions]
+      .sort((a: { parent_id?: string | null }, b: { parent_id?: string | null }) => {
+        if (!a.parent_id && b.parent_id) return -1;
+        if (a.parent_id && !b.parent_id) return 1;
+        return 0;
+      })
+      .map((item: { id: string }) => item.id);
+
+    await deleteTaxRegionsWorkflow(container).run({
+      input: {
+        ids: sortedTaxRegionIds,
+      },
+    });
+  }
+
+  const { data: regions } = await query.graph({
+    entity: "region",
+    fields: ["id"],
+  });
+
+  if (regions?.length) {
+    await deleteRegionsWorkflow(container).run({
+      input: {
+        ids: regions.map((item: { id: string }) => item.id),
+      },
+    });
+  }
+
+  const { data: products } = await query.graph({
+    entity: "product",
+    fields: ["id"],
+  });
+
+  if (products?.length) {
+    await deleteProductsWorkflow(container).run({
+      input: {
+        ids: products.map((item: { id: string }) => item.id),
+      },
+    });
+  }
+
+  const { data: collections } = await query.graph({
+    entity: "product_collection",
+    fields: ["id"],
+  });
+
+  if (collections?.length) {
+    await deleteCollectionsWorkflow(container).run({
+      input: {
+        ids: collections.map((item: { id: string }) => item.id),
+      },
+    });
+  }
+
+  const { data: categories } = await query.graph({
+    entity: "product_category",
+    fields: ["id"],
+  });
+
+  if (categories?.length) {
+    await deleteProductCategoriesWorkflow(container).run({
+      input: categories.map((item: { id: string }) => item.id),
+    });
+  }
+
+  logger.info("Finished clearing previous seed data.");
+}
+
 export default async function seedDemoData({ container }: ExecArgs) {
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
   const link = container.resolve(ContainerRegistrationKeys.LINK);
@@ -63,7 +163,9 @@ export default async function seedDemoData({ container }: ExecArgs) {
   const salesChannelModuleService = container.resolve(Modules.SALES_CHANNEL);
   const storeModuleService = container.resolve(Modules.STORE);
 
-  const countries = ["gb", "de", "dk", "se", "fr", "es", "it"];
+  await clearPreviousSeedData(container, logger, query);
+
+  const countries = ["bd"];
 
   logger.info("Seeding store data...");
   const [store] = await storeModuleService.listStores();
@@ -72,7 +174,6 @@ export default async function seedDemoData({ container }: ExecArgs) {
   });
 
   if (!defaultSalesChannel.length) {
-    // create the default sales channel
     const { result: salesChannelResult } = await createSalesChannelsWorkflow(
       container
     ).run({
@@ -92,7 +193,7 @@ export default async function seedDemoData({ container }: ExecArgs) {
       store_id: store.id,
       supported_currencies: [
         {
-          currency_code: "eur",
+          currency_code: "bdt",
           is_default: true,
         },
         {
@@ -110,13 +211,14 @@ export default async function seedDemoData({ container }: ExecArgs) {
       },
     },
   });
-  logger.info("Seeding region data...");
+
+  logger.info("Seeding Bangladesh region data...");
   const { result: regionResult } = await createRegionsWorkflow(container).run({
     input: {
       regions: [
         {
-          name: "Europe",
-          currency_code: "eur",
+          name: "Bangladesh",
+          currency_code: "bdt",
           countries,
           payment_providers: ["pp_system_default"],
         },
@@ -124,7 +226,7 @@ export default async function seedDemoData({ container }: ExecArgs) {
     },
   });
   const region = regionResult[0];
-  logger.info("Finished seeding regions.");
+  logger.info("Finished seeding region data.");
 
   logger.info("Seeding tax regions...");
   await createTaxRegionsWorkflow(container).run({
@@ -142,11 +244,11 @@ export default async function seedDemoData({ container }: ExecArgs) {
     input: {
       locations: [
         {
-          name: "European Warehouse",
+          name: "Dhaka Warehouse",
           address: {
-            city: "Copenhagen",
-            country_code: "DK",
-            address_1: "",
+            city: "Dhaka",
+            country_code: "BD",
+            address_1: "Uttara",
           },
         },
       ],
@@ -194,38 +296,14 @@ export default async function seedDemoData({ container }: ExecArgs) {
   }
 
   const fulfillmentSet = await fulfillmentModuleService.createFulfillmentSets({
-    name: "European Warehouse delivery",
+    name: "Dhaka Warehouse Delivery",
     type: "shipping",
     service_zones: [
       {
-        name: "Europe",
+        name: "Bangladesh",
         geo_zones: [
           {
-            country_code: "gb",
-            type: "country",
-          },
-          {
-            country_code: "de",
-            type: "country",
-          },
-          {
-            country_code: "dk",
-            type: "country",
-          },
-          {
-            country_code: "se",
-            type: "country",
-          },
-          {
-            country_code: "fr",
-            type: "country",
-          },
-          {
-            country_code: "es",
-            type: "country",
-          },
-          {
-            country_code: "it",
+            country_code: "bd",
             type: "country",
           },
         ],
@@ -245,28 +323,28 @@ export default async function seedDemoData({ container }: ExecArgs) {
   await createShippingOptionsWorkflow(container).run({
     input: [
       {
-        name: "Standard Shipping",
+        name: "Inside Dhaka - Standard",
         price_type: "flat",
         provider_id: "manual_manual",
         service_zone_id: fulfillmentSet.service_zones[0].id,
         shipping_profile_id: shippingProfile.id,
         type: {
           label: "Standard",
-          description: "Ship in 2-3 days.",
+          description: "Delivery in 2-3 days.",
           code: "standard",
         },
         prices: [
           {
-            currency_code: "usd",
-            amount: 10,
+            currency_code: "bdt",
+            amount: 60,
           },
           {
-            currency_code: "eur",
-            amount: 10,
+            currency_code: "usd",
+            amount: 1,
           },
           {
             region_id: region.id,
-            amount: 10,
+            amount: 60,
           },
         ],
         rules: [
@@ -283,28 +361,28 @@ export default async function seedDemoData({ container }: ExecArgs) {
         ],
       },
       {
-        name: "Express Shipping",
+        name: "Outside Dhaka - Express",
         price_type: "flat",
         provider_id: "manual_manual",
         service_zone_id: fulfillmentSet.service_zones[0].id,
         shipping_profile_id: shippingProfile.id,
         type: {
           label: "Express",
-          description: "Ship in 24 hours.",
+          description: "Delivery in 24-48 hours.",
           code: "express",
         },
         prices: [
           {
-            currency_code: "usd",
-            amount: 10,
+            currency_code: "bdt",
+            amount: 120,
           },
           {
-            currency_code: "eur",
-            amount: 10,
+            currency_code: "usd",
+            amount: 2,
           },
           {
             region_id: region.id,
-            amount: 10,
+            amount: 120,
           },
         ],
         rules: [
@@ -370,532 +448,249 @@ export default async function seedDemoData({ container }: ExecArgs) {
   });
   logger.info("Finished seeding publishable API key data.");
 
-  logger.info("Seeding product data...");
+  logger.info("Seeding Korean skincare categories and collections...");
 
   const { result: categoryResult } = await createProductCategoriesWorkflow(
     container
   ).run({
     input: {
       product_categories: [
-        {
-          name: "Shirts",
-          is_active: true,
-        },
-        {
-          name: "Sweatshirts",
-          is_active: true,
-        },
-        {
-          name: "Pants",
-          is_active: true,
-        },
-        {
-          name: "Merch",
-          is_active: true,
-        },
+        { name: "Cleansers", is_active: true },
+        { name: "Toners", is_active: true },
+        { name: "Serums & Ampoules", is_active: true },
+        { name: "Moisturizers", is_active: true },
+        { name: "Sunscreen", is_active: true },
       ],
     },
   });
+
+  const { result: collectionsResult } = await createCollectionsWorkflow(
+    container
+  ).run({
+    input: {
+      collections: [
+        { title: "K-Beauty Essentials", handle: "k-beauty-essentials" },
+        { title: "Sensitive Skin Care", handle: "sensitive-skin-care" },
+        { title: "Brightening Routine", handle: "brightening-routine" },
+      ],
+    },
+  });
+
+  const categoryByName = new Map(categoryResult.map((item) => [item.name, item.id]));
+  const collectionByTitle = new Map(
+    collectionsResult.map((item) => [item.title, item.id])
+  );
 
   await createProductsWorkflow(container).run({
     input: {
       products: [
         {
-          title: "Medusa T-Shirt",
-          category_ids: [
-            categoryResult.find((cat) => cat.name === "Shirts")!.id,
-          ],
+          title: "Etude SoonJung pH 6.5 Whip Cleanser",
+          category_ids: [categoryByName.get("Cleansers")!],
+          collection_id: collectionByTitle.get("Sensitive Skin Care")!,
           description:
-            "Reimagine the feeling of a classic T-shirt. With our cotton T-shirts, everyday essentials no longer have to be ordinary.",
-          handle: "t-shirt",
-          weight: 400,
+            "Low-irritation Korean cleanser with soft foam to cleanse without stripping moisture.",
+          handle: "etude-soonjung-ph-65-whip-cleanser",
+          weight: 150,
           status: ProductStatus.PUBLISHED,
           shipping_profile_id: shippingProfile.id,
-          images: [
-            {
-              url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/tee-black-front.png",
-            },
-            {
-              url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/tee-black-back.png",
-            },
-            {
-              url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/tee-white-front.png",
-            },
-            {
-              url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/tee-white-back.png",
-            },
-          ],
-          options: [
-            {
-              title: "Size",
-              values: ["S", "M", "L", "XL"],
-            },
-            {
-              title: "Color",
-              values: ["Black", "White"],
-            },
-          ],
+          images: [{ url: PRODUCT_IMAGE_PATH }],
+          options: [{ title: "Size", values: ["150ml"] }],
           variants: [
             {
-              title: "S / Black",
-              sku: "SHIRT-S-BLACK",
-              options: {
-                Size: "S",
-                Color: "Black",
-              },
+              title: "150ml",
+              sku: "KSK-CLEANSER-150",
+              options: { Size: "150ml" },
               prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "S / White",
-              sku: "SHIRT-S-WHITE",
-              options: {
-                Size: "S",
-                Color: "White",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "M / Black",
-              sku: "SHIRT-M-BLACK",
-              options: {
-                Size: "M",
-                Color: "Black",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "M / White",
-              sku: "SHIRT-M-WHITE",
-              options: {
-                Size: "M",
-                Color: "White",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "L / Black",
-              sku: "SHIRT-L-BLACK",
-              options: {
-                Size: "L",
-                Color: "Black",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "L / White",
-              sku: "SHIRT-L-WHITE",
-              options: {
-                Size: "L",
-                Color: "White",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "XL / Black",
-              sku: "SHIRT-XL-BLACK",
-              options: {
-                Size: "XL",
-                Color: "Black",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "XL / White",
-              sku: "SHIRT-XL-WHITE",
-              options: {
-                Size: "XL",
-                Color: "White",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
+                { amount: 1450, currency_code: "bdt" },
+                { amount: 14, currency_code: "usd" },
               ],
             },
           ],
-          sales_channels: [
-            {
-              id: defaultSalesChannel[0].id,
-            },
-          ],
+          sales_channels: [{ id: defaultSalesChannel[0].id }],
         },
         {
-          title: "Medusa Sweatshirt",
-          category_ids: [
-            categoryResult.find((cat) => cat.name === "Sweatshirts")!.id,
-          ],
+          title: "Anua Heartleaf 77% Soothing Toner",
+          category_ids: [categoryByName.get("Toners")!],
+          collection_id: collectionByTitle.get("Sensitive Skin Care")!,
           description:
-            "Reimagine the feeling of a classic sweatshirt. With our cotton sweatshirt, everyday essentials no longer have to be ordinary.",
-          handle: "sweatshirt",
-          weight: 400,
+            "Hydrating Korean toner with heartleaf extract to calm redness and support skin barrier.",
+          handle: "anua-heartleaf-77-soothing-toner",
+          weight: 250,
           status: ProductStatus.PUBLISHED,
           shipping_profile_id: shippingProfile.id,
-          images: [
-            {
-              url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/sweatshirt-vintage-front.png",
-            },
-            {
-              url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/sweatshirt-vintage-back.png",
-            },
-          ],
-          options: [
-            {
-              title: "Size",
-              values: ["S", "M", "L", "XL"],
-            },
-          ],
+          images: [{ url: PRODUCT_IMAGE_PATH }],
+          options: [{ title: "Size", values: ["250ml"] }],
           variants: [
             {
-              title: "S",
-              sku: "SWEATSHIRT-S",
-              options: {
-                Size: "S",
-              },
+              title: "250ml",
+              sku: "KSK-TONER-250",
+              options: { Size: "250ml" },
               prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "M",
-              sku: "SWEATSHIRT-M",
-              options: {
-                Size: "M",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "L",
-              sku: "SWEATSHIRT-L",
-              options: {
-                Size: "L",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "XL",
-              sku: "SWEATSHIRT-XL",
-              options: {
-                Size: "XL",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
+                { amount: 2100, currency_code: "bdt" },
+                { amount: 20, currency_code: "usd" },
               ],
             },
           ],
-          sales_channels: [
-            {
-              id: defaultSalesChannel[0].id,
-            },
-          ],
+          sales_channels: [{ id: defaultSalesChannel[0].id }],
         },
         {
-          title: "Medusa Sweatpants",
-          category_ids: [
-            categoryResult.find((cat) => cat.name === "Pants")!.id,
-          ],
+          title: "SOME BY MI AHA BHA PHA Miracle Toner",
+          category_ids: [categoryByName.get("Toners")!],
+          collection_id: collectionByTitle.get("Brightening Routine")!,
           description:
-            "Reimagine the feeling of classic sweatpants. With our cotton sweatpants, everyday essentials no longer have to be ordinary.",
-          handle: "sweatpants",
-          weight: 400,
+            "Gentle exfoliating toner for uneven texture and clogged pores, ideal for humid weather.",
+          handle: "some-by-mi-aha-bha-pha-miracle-toner",
+          weight: 150,
           status: ProductStatus.PUBLISHED,
           shipping_profile_id: shippingProfile.id,
-          images: [
-            {
-              url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/sweatpants-gray-front.png",
-            },
-            {
-              url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/sweatpants-gray-back.png",
-            },
-          ],
-          options: [
-            {
-              title: "Size",
-              values: ["S", "M", "L", "XL"],
-            },
-          ],
+          images: [{ url: PRODUCT_IMAGE_PATH }],
+          options: [{ title: "Size", values: ["150ml"] }],
           variants: [
             {
-              title: "S",
-              sku: "SWEATPANTS-S",
-              options: {
-                Size: "S",
-              },
+              title: "150ml",
+              sku: "KSK-TONER-MIRACLE-150",
+              options: { Size: "150ml" },
               prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "M",
-              sku: "SWEATPANTS-M",
-              options: {
-                Size: "M",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "L",
-              sku: "SWEATPANTS-L",
-              options: {
-                Size: "L",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "XL",
-              sku: "SWEATPANTS-XL",
-              options: {
-                Size: "XL",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
+                { amount: 1800, currency_code: "bdt" },
+                { amount: 17, currency_code: "usd" },
               ],
             },
           ],
-          sales_channels: [
-            {
-              id: defaultSalesChannel[0].id,
-            },
-          ],
+          sales_channels: [{ id: defaultSalesChannel[0].id }],
         },
         {
-          title: "Medusa Shorts",
-          category_ids: [
-            categoryResult.find((cat) => cat.name === "Merch")!.id,
-          ],
+          title: "COSRX Advanced Snail 96 Mucin Essence",
+          category_ids: [categoryByName.get("Serums & Ampoules")!],
+          collection_id: collectionByTitle.get("K-Beauty Essentials")!,
           description:
-            "Reimagine the feeling of classic shorts. With our cotton shorts, everyday essentials no longer have to be ordinary.",
-          handle: "shorts",
-          weight: 400,
+            "Repairing essence with snail mucin that deeply hydrates and improves skin elasticity.",
+          handle: "cosrx-advanced-snail-96-mucin-essence",
+          weight: 100,
           status: ProductStatus.PUBLISHED,
           shipping_profile_id: shippingProfile.id,
-          images: [
-            {
-              url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/shorts-vintage-front.png",
-            },
-            {
-              url: "https://medusa-public-images.s3.eu-west-1.amazonaws.com/shorts-vintage-back.png",
-            },
-          ],
-          options: [
-            {
-              title: "Size",
-              values: ["S", "M", "L", "XL"],
-            },
-          ],
+          images: [{ url: PRODUCT_IMAGE_PATH }],
+          options: [{ title: "Size", values: ["100ml"] }],
           variants: [
             {
-              title: "S",
-              sku: "SHORTS-S",
-              options: {
-                Size: "S",
-              },
+              title: "100ml",
+              sku: "KSK-ESSENCE-SNAIL-100",
+              options: { Size: "100ml" },
               prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "M",
-              sku: "SHORTS-M",
-              options: {
-                Size: "M",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "L",
-              sku: "SHORTS-L",
-              options: {
-                Size: "L",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
-              ],
-            },
-            {
-              title: "XL",
-              sku: "SHORTS-XL",
-              options: {
-                Size: "XL",
-              },
-              prices: [
-                {
-                  amount: 10,
-                  currency_code: "eur",
-                },
-                {
-                  amount: 15,
-                  currency_code: "usd",
-                },
+                { amount: 2050, currency_code: "bdt" },
+                { amount: 19, currency_code: "usd" },
               ],
             },
           ],
-          sales_channels: [
+          sales_channels: [{ id: defaultSalesChannel[0].id }],
+        },
+        {
+          title: "SKIN1004 Madagascar Centella Ampoule",
+          category_ids: [categoryByName.get("Serums & Ampoules")!],
+          collection_id: collectionByTitle.get("Sensitive Skin Care")!,
+          description:
+            "Single-ingredient centella ampoule to soothe irritated skin and reduce sensitivity.",
+          handle: "skin1004-madagascar-centella-ampoule",
+          weight: 100,
+          status: ProductStatus.PUBLISHED,
+          shipping_profile_id: shippingProfile.id,
+          images: [{ url: PRODUCT_IMAGE_PATH }],
+          options: [{ title: "Size", values: ["100ml"] }],
+          variants: [
             {
-              id: defaultSalesChannel[0].id,
+              title: "100ml",
+              sku: "KSK-AMPOULE-CENTELLA-100",
+              options: { Size: "100ml" },
+              prices: [
+                { amount: 2350, currency_code: "bdt" },
+                { amount: 22, currency_code: "usd" },
+              ],
             },
           ],
+          sales_channels: [{ id: defaultSalesChannel[0].id }],
+        },
+        {
+          title: "Klairs Freshly Juiced Vitamin Drop",
+          category_ids: [categoryByName.get("Serums & Ampoules")!],
+          collection_id: collectionByTitle.get("Brightening Routine")!,
+          description:
+            "Vitamin C serum that helps brighten dull skin and fade post-acne dark spots.",
+          handle: "klairs-freshly-juiced-vitamin-drop",
+          weight: 35,
+          status: ProductStatus.PUBLISHED,
+          shipping_profile_id: shippingProfile.id,
+          images: [{ url: PRODUCT_IMAGE_PATH }],
+          options: [{ title: "Size", values: ["35ml"] }],
+          variants: [
+            {
+              title: "35ml",
+              sku: "KSK-SERUM-VITC-35",
+              options: { Size: "35ml" },
+              prices: [
+                { amount: 1900, currency_code: "bdt" },
+                { amount: 18, currency_code: "usd" },
+              ],
+            },
+          ],
+          sales_channels: [{ id: defaultSalesChannel[0].id }],
+        },
+        {
+          title: "Innisfree Green Tea Seed Hyaluronic Cream",
+          category_ids: [categoryByName.get("Moisturizers")!],
+          collection_id: collectionByTitle.get("K-Beauty Essentials")!,
+          description:
+            "Lightweight gel cream with green tea and hyaluronic acid for all-day hydration.",
+          handle: "innisfree-green-tea-seed-hyaluronic-cream",
+          weight: 50,
+          status: ProductStatus.PUBLISHED,
+          shipping_profile_id: shippingProfile.id,
+          images: [{ url: PRODUCT_IMAGE_PATH }],
+          options: [{ title: "Size", values: ["50ml"] }],
+          variants: [
+            {
+              title: "50ml",
+              sku: "KSK-CREAM-GREEN-TEA-50",
+              options: { Size: "50ml" },
+              prices: [
+                { amount: 2200, currency_code: "bdt" },
+                { amount: 21, currency_code: "usd" },
+              ],
+            },
+          ],
+          sales_channels: [{ id: defaultSalesChannel[0].id }],
+        },
+        {
+          title: "Beauty of Joseon Relief Sun SPF50+",
+          category_ids: [categoryByName.get("Sunscreen")!],
+          collection_id: collectionByTitle.get("K-Beauty Essentials")!,
+          description:
+            "Rice + probiotic sunscreen with no white cast, suitable for tropical daily use.",
+          handle: "beauty-of-joseon-relief-sun-spf50",
+          weight: 50,
+          status: ProductStatus.PUBLISHED,
+          shipping_profile_id: shippingProfile.id,
+          images: [{ url: PRODUCT_IMAGE_PATH }],
+          options: [{ title: "Size", values: ["50ml"] }],
+          variants: [
+            {
+              title: "50ml",
+              sku: "KSK-SUNSCREEN-RELIEF-50",
+              options: { Size: "50ml" },
+              prices: [
+                { amount: 1750, currency_code: "bdt" },
+                { amount: 16, currency_code: "usd" },
+              ],
+            },
+          ],
+          sales_channels: [{ id: defaultSalesChannel[0].id }],
         },
       ],
     },
   });
-  logger.info("Finished seeding product data.");
 
-  logger.info("Seeding inventory levels.");
+  logger.info("Finished seeding Korean skincare product data.");
+
+  logger.info("Seeding inventory levels...");
 
   const { data: inventoryItems } = await query.graph({
     entity: "inventory_item",
@@ -904,19 +699,20 @@ export default async function seedDemoData({ container }: ExecArgs) {
 
   const inventoryLevels: CreateInventoryLevelInput[] = [];
   for (const inventoryItem of inventoryItems) {
-    const inventoryLevel = {
+    inventoryLevels.push({
       location_id: stockLocation.id,
-      stocked_quantity: 1000000,
+      stocked_quantity: 1000,
       inventory_item_id: inventoryItem.id,
-    };
-    inventoryLevels.push(inventoryLevel);
+    });
   }
 
-  await createInventoryLevelsWorkflow(container).run({
-    input: {
-      inventory_levels: inventoryLevels,
-    },
-  });
+  if (inventoryLevels.length) {
+    await createInventoryLevelsWorkflow(container).run({
+      input: {
+        inventory_levels: inventoryLevels,
+      },
+    });
+  }
 
   logger.info("Finished seeding inventory levels data.");
 }

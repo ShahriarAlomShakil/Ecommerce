@@ -32,7 +32,7 @@ export const retrieveRegion = async (id: string) => {
       cache: "force-cache",
     })
     .then(({ region }) => region)
-    .catch(medusaError)
+    .catch(() => null)
 }
 
 const regionMap = new Map<string, HttpTypes.StoreRegion>()
