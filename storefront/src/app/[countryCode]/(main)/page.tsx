@@ -9,6 +9,7 @@ import TrendingNow from "@components/home/TrendingNow"
 import EditorialSection from "@components/home/EditorialSection"
 import Testimonials from "@components/home/Testimonials"
 import TrustBadges from "@components/home/TrustBadges"
+import NewsletterSection from "@components/home/NewsletterSection"
 
 export const metadata: Metadata = {
   title: "GlowHaus BD - Korean Skincare for Bangladesh",
@@ -51,6 +52,9 @@ export default async function Home(props: {
 
       {/* Trust Badges */}
       <TrustBadges />
+
+      {/* Newsletter Signup */}
+      <NewsletterSection />
     </>
   )
 }
