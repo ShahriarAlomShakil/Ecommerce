@@ -329,16 +329,7 @@ function HeroSlide3() {
           className="relative overflow-hidden rounded-lg"
         >
           <img
-            src="https://images.unsplash.com/photo-1556228541-a3dee5dc02ca?w=600&h=300&fit=crop"
-            alt="Sunscreen Product 1"
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-          />
-        </motion.div>
-
-        {/* Bottom Image */}
-        <motion.div
-          initial={{ opacity: 0, x: 40 }}
-          whileInView={{ opacity: 1, x: 0 }}
+              src="https://images.unsplash.com/photo-1585314063955-b76191c69a37?w=600&h=300&fit=crop"
           transition={{ duration: 0.6, delay: 0.4 }}
           viewport={{ once: true }}
           className="relative overflow-hidden rounded-lg"
