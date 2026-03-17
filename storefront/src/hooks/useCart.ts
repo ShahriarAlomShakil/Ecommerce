@@ -1,6 +1,15 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import {
+	createElement,
+	createContext,
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useState,
+} from "react"
+import toast from "react-hot-toast"
 
 const STORAGE_KEY = "glowhaus-cart-items"
 const EVENT_NAME = "glowhaus-cart-updated"
@@ -9,6 +18,17 @@ export type CartItem = {
 	id: string
 	quantity: number
 }
+
+type CartContextValue = {
+	items: CartItem[]
+	count: number
+	addItem: (id: string, quantity?: number) => void
+	removeItem: (id: string) => void
+	updateQuantity: (id: string, quantity: number) => void
+	clearCart: () => void
+}
+
+const CartContext = createContext<CartContextValue | null>(null)
 
 const readCart = (): CartItem[] => {
 	if (typeof window === "undefined") {
@@ -39,7 +59,7 @@ const writeCart = (items: CartItem[]) => {
 	window.dispatchEvent(new Event(EVENT_NAME))
 }
 
-export function useCart() {
+function useCartState(): CartContextValue {
 	const [items, setItems] = useState<CartItem[]>([])
 
 	useEffect(() => {
@@ -66,10 +86,12 @@ export function useCart() {
 					: item
 			)
 			writeCart(next)
+			toast.success("Cart updated")
 			return
 		}
 
 		writeCart([...current, { id, quantity: Math.max(1, quantity) }])
+		toast.success("Added to cart")
 	}, [])
 
 	const removeItem = useCallback((id: string) => {
@@ -106,4 +128,20 @@ export function useCart() {
 		updateQuantity,
 		clearCart,
 	}
+}
+
+export function CartProvider({ children }: { children: React.ReactNode }) {
+	const value = useCartState()
+
+	return createElement(CartContext.Provider, { value }, children)
+}
+
+export function useCart() {
+	const context = useContext(CartContext)
+
+	if (!context) {
+		throw new Error("useCart must be used within CartProvider")
+	}
+
+	return context
 }

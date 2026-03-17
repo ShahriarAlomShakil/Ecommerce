@@ -7,7 +7,7 @@ import {
   Space_Grotesk,
   Noto_Sans_KR,
 } from "next/font/google"
-import { ThemeProvider } from "@providers/ThemeProvider"
+import RootLayoutShell from "@components/layout/RootLayoutShell"
 import "styles/globals.css"
 
 /* ── Display / Hero font ── */
@@ -84,21 +84,13 @@ export default function RootLayout(props: { children: React.ReactNode }) {
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
       </head>
       <body>
-        <ThemeProvider>
-          <div className="grain-overlay" aria-hidden="true" />
-          {/* Skip-to-content for accessibility */}
-          <a
-            href="#main-content"
-            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-primary focus:text-white focus:rounded-btn focus:outline-none"
-          >
-            Skip to content
-          </a>
-          <main id="main-content" className="relative">
-            {props.children}
-          </main>
-        </ThemeProvider>
+        <RootLayoutShell>{props.children}</RootLayoutShell>
       </body>
     </html>
   )

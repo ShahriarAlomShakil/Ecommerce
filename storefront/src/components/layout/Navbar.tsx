@@ -23,6 +23,11 @@ import { useWishlist } from "@hooks/useWishlist"
 import { cn } from "@lib/utils"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
+type NavbarProps = {
+	onSearchOpen?: () => void
+	onCartOpen?: () => void
+}
+
 type NavItem = {
 	label: string
 	href: string
@@ -131,7 +136,7 @@ function normalizePath(pathname?: string | null) {
 	return pathname.replace(/^\/[a-z]{2}(?=\/|$)/, "") || "/"
 }
 
-export default function Navbar() {
+export default function Navbar({ onSearchOpen, onCartOpen }: NavbarProps) {
 	const pathname = usePathname()
 	const [isScrolled, setIsScrolled] = useState(false)
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -230,6 +235,14 @@ export default function Navbar() {
 
 	const normalizedPath = normalizePath(pathname)
 	const isCategoriesActive = normalizedPath.startsWith("/categories")
+	const handleSearchOpen = () => {
+		if (onSearchOpen) {
+			onSearchOpen()
+			return
+		}
+
+		setIsSearchOpen(true)
+	}
 
 	return (
 		<>
@@ -402,7 +415,7 @@ export default function Navbar() {
 					<div className="hidden flex-1 items-center justify-end gap-1.5 lg:flex">
 						<button
 							type="button"
-							onClick={() => setIsSearchOpen(true)}
+							onClick={handleSearchOpen}
 							aria-label="Open search"
 							className="inline-flex h-10 w-10 items-center justify-center rounded-full text-[var(--color-text)] transition hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
 						>
@@ -418,14 +431,26 @@ export default function Navbar() {
 							<CountBadge count={wishlistCount} />
 						</LocalizedClientLink>
 
-						<LocalizedClientLink
-							href="/cart"
-							aria-label="Cart"
-							className="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-[var(--color-text)] transition hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-						>
-							<ShoppingBag className="h-5 w-5" />
-							<CountBadge count={cartCount} />
-						</LocalizedClientLink>
+						{onCartOpen ? (
+							<button
+								type="button"
+								onClick={onCartOpen}
+								aria-label="Cart"
+								className="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-[var(--color-text)] transition hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+							>
+								<ShoppingBag className="h-5 w-5" />
+								<CountBadge count={cartCount} />
+							</button>
+						) : (
+							<LocalizedClientLink
+								href="/cart"
+								aria-label="Cart"
+								className="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-[var(--color-text)] transition hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+							>
+								<ShoppingBag className="h-5 w-5" />
+								<CountBadge count={cartCount} />
+							</LocalizedClientLink>
+						)}
 
 						<LocalizedClientLink
 							href="/account"
@@ -449,21 +474,33 @@ export default function Navbar() {
 					<div className="flex items-center gap-1 lg:hidden">
 						<button
 							type="button"
-							onClick={() => setIsSearchOpen(true)}
+							onClick={handleSearchOpen}
 							aria-label="Open search"
 							className="inline-flex h-10 w-10 items-center justify-center rounded-full text-[var(--color-text)] transition hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
 						>
 							<Search className="h-5 w-5" />
 						</button>
 
-						<LocalizedClientLink
-							href="/cart"
-							aria-label="Cart"
-							className="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-[var(--color-text)] transition hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-						>
-							<ShoppingBag className="h-5 w-5" />
-							<CountBadge count={cartCount} />
-						</LocalizedClientLink>
+						{onCartOpen ? (
+							<button
+								type="button"
+								onClick={onCartOpen}
+								aria-label="Cart"
+								className="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-[var(--color-text)] transition hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+							>
+								<ShoppingBag className="h-5 w-5" />
+								<CountBadge count={cartCount} />
+							</button>
+						) : (
+							<LocalizedClientLink
+								href="/cart"
+								aria-label="Cart"
+								className="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-[var(--color-text)] transition hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+							>
+								<ShoppingBag className="h-5 w-5" />
+								<CountBadge count={cartCount} />
+							</LocalizedClientLink>
+						)}
 					</div>
 				</div>
 
@@ -664,7 +701,9 @@ export default function Navbar() {
 				</AnimatePresence>
 			</header>
 
-			<SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+			{!onSearchOpen && (
+				<SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+			)}
 		</>
 	)
 }

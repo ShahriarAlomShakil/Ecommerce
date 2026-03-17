@@ -4,9 +4,7 @@ import { listCartOptions, retrieveCart } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
 import { getBaseURL } from "@lib/util/env"
 import { StoreCartShippingOption } from "@medusajs/types"
-import AnnouncementBar from "@components/layout/AnnouncementBar"
 import Footer from "@components/layout/Footer"
-import Navbar from "@components/layout/Navbar"
 import CartMismatchBanner from "@modules/layout/components/cart-mismatch-banner"
 import FreeShippingPriceNudge from "@modules/shipping/components/free-shipping-price-nudge"
 
@@ -27,8 +25,6 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
 
   return (
     <>
-      <AnnouncementBar />
-      <Navbar />
       {customer && cart && (
         <CartMismatchBanner customer={customer} cart={cart} />
       )}
