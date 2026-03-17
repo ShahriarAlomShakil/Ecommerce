@@ -5,9 +5,9 @@ import { retrieveCustomer } from "@lib/data/customer"
 import { getBaseURL } from "@lib/util/env"
 import { StoreCartShippingOption } from "@medusajs/types"
 import AnnouncementBar from "@components/layout/AnnouncementBar"
+import Footer from "@components/layout/Footer"
 import Navbar from "@components/layout/Navbar"
 import CartMismatchBanner from "@modules/layout/components/cart-mismatch-banner"
-import Footer from "@modules/layout/templates/footer"
 import FreeShippingPriceNudge from "@modules/shipping/components/free-shipping-price-nudge"
 
 export const metadata: Metadata = {
