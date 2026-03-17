@@ -102,7 +102,7 @@ function GlowHausLogo() {
 }
 
 export default function Footer() {
-	const [openSection, setOpenSection] = useState<string>(FOOTER_SECTIONS[0].title)
+	const [openSection, setOpenSection] = useState<string>("")
 
 	return (
 		<footer className="border-t border-border bg-[var(--brand-earth)] text-[var(--color-text)] [--color-text:var(--brand-cream)] [--color-text-muted:var(--brand-blush)] [--color-border:var(--brand-rose)]">
