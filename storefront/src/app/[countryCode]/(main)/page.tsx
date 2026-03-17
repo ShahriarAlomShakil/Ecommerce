@@ -4,7 +4,9 @@ import CategoryShowcase from "@components/home/CategoryShowcase"
 import FeaturedProducts from "@components/home/FeaturedProducts"
 import HeroBanner from "@components/home/HeroBanner"
 import PromoBanner from "@components/home/PromoBanner"
+import SkinConcernFinder from "@components/home/SkinConcernFinder"
 import TrendingNow from "@components/home/TrendingNow"
+import EditorialSection from "@components/home/EditorialSection"
 
 export const metadata: Metadata = {
   title: "GlowHaus BD - Korean Skincare for Bangladesh",
@@ -36,12 +38,11 @@ export default async function Home(props: {
       {/* Trending Now Tab Grid */}
       <TrendingNow />
 
-      {/* Placeholder for upcoming sections */}
-      <section className="glowhaus-container py-16">
-        <div className="rounded-card border border-border bg-bg-card p-6 text-center text-sm text-muted">
-          🏗️ More sections coming soon: Editorial Story, and more...
-        </div>
-      </section>
+      {/* Editorial Story — Why K-Beauty */}
+      <EditorialSection />
+
+      {/* Skin Concern Finder */}
+      <SkinConcernFinder />
     </>
   )
 }
