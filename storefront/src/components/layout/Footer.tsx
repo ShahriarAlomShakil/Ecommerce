@@ -105,7 +105,7 @@ export default function Footer() {
 	const [openSection, setOpenSection] = useState<string>(FOOTER_SECTIONS[0].title)
 
 	return (
-		<footer className="border-t border-border bg-surface text-[var(--color-text)]">
+		<footer className="border-t border-border bg-[var(--brand-earth)] text-[var(--color-text)] [--color-text:var(--brand-cream)] [--color-text-muted:var(--brand-blush)] [--color-border:var(--brand-rose)]">
 			<div className="mx-auto w-full max-w-[1400px] px-4 pb-6 pt-10 font-ui text-sm sm:px-6 lg:px-8 lg:pt-14">
 				<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4 lg:gap-10">
 					<div className="space-y-4">
