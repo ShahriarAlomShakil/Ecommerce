@@ -2,6 +2,7 @@
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CategoriesDropdown from "./categories-dropdown"
+import MobileCategoriesMenu from "./mobile-categories-menu"
 import { useEffect, useState } from "react"
 
 type SkincareNavProps = {
@@ -118,26 +119,10 @@ export default function SkincareNav({ cartCount = 0 }: SkincareNavProps) {
       </header>
 
       {/* Mobile Menu Overlay */}
-      <div 
-        className={`fixed inset-0 bg-[#FAF6F0] z-40 transition-all duration-500 ease-in-out md:hidden ${
-          isMobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
-      >
-        <div className="flex flex-col items-center justify-center h-full gap-8">
-          {navLinks.map((link) => (
-            <LocalizedClientLink
-              key={link.label}
-              href={link.href}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={`font-serif text-3xl text-[#3A2820] transition-all duration-500 delay-100 ${
-                isMobileMenuOpen ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-              }`}
-            >
-              {link.label}
-            </LocalizedClientLink>
-          ))}
-        </div>
-      </div>
+      <MobileCategoriesMenu
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+      />
     </>
   )
 }
