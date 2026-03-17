@@ -42,6 +42,31 @@ const nextConfig = {
         protocol: "https",
         hostname: "medusa-server-testing.s3.us-east-1.amazonaws.com",
       },
+      /* GlowHaus BD product & brand CDNs */
+      {
+        protocol: "https",
+        hostname: "cdn.glowhausbd.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.amorepacific.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.innisfree.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.cosrx.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.laneige.com",
+      },
       ...(S3_HOSTNAME && S3_PATHNAME
         ? [
             {

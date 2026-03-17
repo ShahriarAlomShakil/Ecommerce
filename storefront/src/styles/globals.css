@@ -1,22 +1,78 @@
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@300;400;500&family=Space+Grotesk:wght@400;500&family=Noto+Sans+KR:wght@300;400&display=swap');
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+/* ============================================
+   GlowHaus BD — Design Token System
+   Light & Dark Theme CSS Custom Properties
+   ============================================ */
+
 :root {
-  --brand-cream: #faf6f0;
-  --brand-blush: #e8c4b0;
-  --brand-rose: #c9877a;
-  --brand-sage: #8a9f87;
-  --brand-earth: #3a2820;
-  --brand-sand: #d4b89a;
-  --brand-mist: #f2ede6;
-  --brand-text: #2e1f14;
+  /* ── Light Theme Tokens ── */
+  --color-primary: #F2A7B3;
+  --color-primary-deep: #C2748A;
+  --color-secondary: #B8D8C8;
+  --color-bg: #FDF8F5;
+  --color-bg-card: #FFFFFF;
+  --color-surface: #F7EFE9;
+  --color-text: #2C2C2C;
+  --color-text-muted: #8A8A8A;
+  --color-border: #EAD9D3;
+  --color-accent: #D4A853;
+  --color-nav-bg: rgba(253, 248, 245, 0.92);
+
+  /* ── Spacing ── */
+  --section-padding: clamp(3rem, 6vw, 6rem);
+  --container-max: 1400px;
+
+  /* ── Border Radius ── */
+  --radius-card: 16px;
+  --radius-btn: 50px;
+  --radius-img: 12px;
+
+  /* ── Shadows ── */
+  --shadow-card: 0 4px 24px rgba(194, 116, 138, 0.08);
+  --shadow-hover: 0 12px 40px rgba(194, 116, 138, 0.18);
+  --shadow-nav: 0 2px 20px rgba(44, 44, 44, 0.06);
+
+  /* ── Legacy brand vars (kept for backwards compat) ── */
+  --brand-cream: #FAF6F0;
+  --brand-blush: #E8C4B0;
+  --brand-rose: #C9877A;
+  --brand-sage: #8A9F87;
+  --brand-earth: #3A2820;
+  --brand-sand: #D4B89A;
+  --brand-mist: #F2EDE6;
+  --brand-text: #2E1F14;
+}
+
+[data-theme="dark"] {
+  /* ── Dark Theme Tokens ── */
+  --color-primary: #FF8FA3;
+  --color-primary-deep: #F06080;
+  --color-secondary: #6DBFA0;
+  --color-bg: #141414;
+  --color-bg-card: #1E1E1E;
+  --color-surface: #252525;
+  --color-text: #F0EAE8;
+  --color-text-muted: #9A9A9A;
+  --color-border: #3A2A2F;
+  --color-accent: #E8B85A;
+  --color-nav-bg: rgba(20, 20, 20, 0.95);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3);
+  --shadow-hover: 0 12px 40px rgba(255, 143, 163, 0.15);
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background-color: #faf6f0;
-  color: #2e1f14;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .grain-overlay {
@@ -27,6 +83,30 @@ body {
   opacity: 0.4;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E");
   background-repeat: repeat;
+}
+
+/* ── GlowHaus Section Utilities ── */
+.glowhaus-section {
+  padding-top: var(--section-padding);
+  padding-bottom: var(--section-padding);
+}
+
+.glowhaus-container {
+  max-width: var(--container-max);
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(1rem, 4vw, 2rem);
+  padding-right: clamp(1rem, 4vw, 2rem);
+}
+
+/* ── Reduced motion support ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 .reveal-section { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }

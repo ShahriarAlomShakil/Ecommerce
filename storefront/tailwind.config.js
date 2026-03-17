@@ -2,7 +2,7 @@ const path = require("path")
 const defaultTheme = require("tailwindcss/defaultTheme")
 
 module.exports = {
-  darkMode: "class",
+  darkMode: ["class", '[data-theme="dark"]'],
   presets: [require("@medusajs/ui-preset")],
   content: [
     "./src/app/**/*.{js,ts,jsx,tsx}",
@@ -22,6 +22,16 @@ module.exports = {
         padding: "padding-top padding-right padding-bottom padding-left",
       },
       colors: {
+        /* GlowHaus CSS-var driven semantic colors */
+        primary: "var(--color-primary)",
+        "primary-deep": "var(--color-primary-deep)",
+        secondary: "var(--color-secondary)",
+        surface: "var(--color-surface)",
+        "bg-card": "var(--color-bg-card)",
+        border: "var(--color-border)",
+        accent: "var(--color-accent)",
+        muted: "var(--color-text-muted)",
+        /* Legacy brand palette kept for existing components */
         grey: {
           0: "#FFFFFF",
           5: "#F9FAFB",
@@ -51,6 +61,14 @@ module.exports = {
         rounded: "8px",
         large: "16px",
         circle: "9999px",
+        card: "var(--radius-card)",
+        btn: "var(--radius-btn)",
+        img: "var(--radius-img)",
+      },
+      boxShadow: {
+        card: "var(--shadow-card)",
+        hover: "var(--shadow-hover)",
+        nav: "var(--shadow-nav)",
       },
       maxWidth: {
         "8xl": "100rem",
@@ -68,8 +86,14 @@ module.exports = {
         "3xl": "2rem",
       },
       fontFamily: {
+        display: ["Cormorant Garamond", ...defaultTheme.fontFamily.serif],
+        heading: ["DM Serif Display", ...defaultTheme.fontFamily.serif],
+        body: ["Plus Jakarta Sans", ...defaultTheme.fontFamily.sans],
+        ui: ["Space Grotesk", ...defaultTheme.fontFamily.sans],
+        korean: ["Noto Sans KR", ...defaultTheme.fontFamily.sans],
+        /* Legacy aliases */
         serif: ["Cormorant Garamond", ...defaultTheme.fontFamily.serif],
-        sans: ["DM Sans", ...defaultTheme.fontFamily.sans],
+        sans: ["Plus Jakarta Sans", "DM Sans", ...defaultTheme.fontFamily.sans],
       },
       keyframes: {
         ring: {
