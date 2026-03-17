@@ -219,4 +219,9 @@ body {
   .text-3xl-semi {
     @apply text-[32px] leading-[44px] font-semibold;
   }
+
+  /* Gradient utilities for HeroBanner */
+  .bg-gradient-radial {
+    background: radial-gradient(var(--tw-gradient-stops));
+  }
 }
