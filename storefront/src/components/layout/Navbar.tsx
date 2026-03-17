@@ -319,7 +319,7 @@ export default function Navbar() {
 													animate={{ opacity: 1, y: 0 }}
 													exit={{ opacity: 0, y: 10 }}
 													transition={{ duration: 0.18, ease: "easeOut" }}
-													className="absolute left-1/2 top-full z-20 mt-3 w-[22rem] -translate-x-1/2 rounded-[24px] border border-border bg-[var(--color-bg-card)]/95 p-4 shadow-[0_24px_64px_rgba(15,23,42,0.12)] backdrop-blur-xl"
+												className="absolute left-1/2 top-full z-20 mt-3 w-[22rem] -translate-x-1/2 rounded-[24px] border border-border bg-[var(--color-bg-card)] p-4 shadow-[0_24px_64px_rgba(15,23,42,0.12)] backdrop-blur-xl"
 												>
 													<div className="mb-3 flex items-center justify-between">
 														<div>
@@ -469,54 +469,69 @@ export default function Navbar() {
 
 				<AnimatePresence>
 					{isMobileMenuOpen && (
-						<>
-							<motion.button
-								type="button"
-								aria-label="Close menu"
-								className="fixed inset-0 z-[109] bg-black/35 lg:hidden"
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								exit={{ opacity: 0 }}
-								onClick={() => setIsMobileMenuOpen(false)}
-							/>
-
-							<motion.aside
-								className="fixed inset-y-0 left-0 z-[111] flex w-full max-w-sm flex-col bg-[var(--color-nav-bg)] px-6 pb-8 pt-6 shadow-xl lg:hidden"
-								initial={{ x: "-100%" }}
-								animate={{ x: 0 }}
-								exit={{ x: "-100%" }}
-								transition={{ type: "spring", stiffness: 320, damping: 32 }}
-							>
-								<div className="mb-8 flex items-center justify-between">
-									<ThemeToggle className="bg-[var(--color-bg-card)]/90" />
-
-									<button
-										type="button"
+						<motion.aside
+							className="fixed inset-0 z-[111] flex h-dvh flex-col overflow-hidden bg-[var(--color-surface)] lg:hidden"
+							initial={{ x: "-100%" }}
+							animate={{ x: 0 }}
+							exit={{ x: "-100%" }}
+							transition={{ type: "spring", stiffness: 320, damping: 32 }}
+						>
+							<div className="border-b border-border bg-[var(--color-bg-card)] px-5 pb-5 pt-5">
+								<div className="flex items-center justify-between gap-3">
+									<LocalizedClientLink
+										href="/"
+										aria-label="Go to homepage"
 										onClick={() => setIsMobileMenuOpen(false)}
-										aria-label="Close navigation menu"
-										className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-[var(--color-bg-card)]/90 text-[var(--color-text)] shadow-sm transition hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+										className="text-[var(--color-text)]"
 									>
-										<X className="h-5 w-5" />
-									</button>
+										<div className="origin-left scale-[0.72]">
+											<GlowHausLogo />
+										</div>
+									</LocalizedClientLink>
+
+									<div className="flex items-center gap-2">
+										<ThemeToggle className="border-border bg-[var(--color-bg-card)] shadow-none backdrop-blur-none" />
+
+										<button
+											type="button"
+											onClick={() => setIsMobileMenuOpen(false)}
+											aria-label="Close navigation menu"
+											className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-[var(--color-bg)] text-[var(--color-text)] shadow-sm transition hover:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+										>
+											<X className="h-5 w-5" />
+										</button>
+									</div>
 								</div>
 
-								<nav className="space-y-1">
+							</div>
+
+							<div className="flex-1 overflow-y-auto px-5 pb-8 pt-5 no-scrollbar">
+								<nav className="space-y-3">
 									{NAV_ITEMS.map((item) => {
 										if (item.hasDropdown) {
 											return (
-												<div key={item.label} className="rounded-2xl border border-border/70 bg-[var(--color-bg-card)]/45 px-3 py-2.5">
+												<div
+													key={item.label}
+													className="rounded-[28px] border border-border bg-[var(--color-bg-card)] p-4 shadow-[0_12px_32px_rgba(44,44,44,0.06)]"
+												>
 													<button
 														type="button"
 														onClick={() => setIsMobileCategoriesOpen((previous) => !previous)}
-														className="flex w-full items-center justify-between font-ui text-base text-[var(--color-text)] transition"
+														className="flex w-full items-start justify-between gap-4 text-left"
 													>
-														<span>Categories</span>
-														<ChevronDown
-															className={cn(
-																"h-4 w-4 transition-transform duration-200",
-																isMobileCategoriesOpen && "rotate-180"
-															)}
-														/>
+														<div>
+															<h3 className="font-ui text-lg font-medium text-[var(--color-text)]">
+																Categories
+															</h3>
+														</div>
+														<span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-[var(--color-bg)] text-[var(--color-text)]">
+															<ChevronDown
+																className={cn(
+																	"h-4 w-4 transition-transform duration-200",
+																	isMobileCategoriesOpen && "rotate-180"
+																)}
+															/>
+														</span>
 													</button>
 
 													<AnimatePresence initial={false}>
@@ -528,62 +543,69 @@ export default function Navbar() {
 																transition={{ duration: 0.2, ease: "easeOut" }}
 																className="overflow-hidden"
 															>
-																<div className="mt-3 space-y-2 border-t border-border/70 pt-3">
+																<div className="mt-4 space-y-3 border-t border-border pt-4">
 																	{isCategoriesLoading && categories.length === 0 ? (
-																		<p className="px-1 text-sm text-muted">Loading categories...</p>
+																		<p className="rounded-2xl border border-border bg-[var(--color-bg)] px-4 py-3 text-sm text-muted">
+																		Loading categories...
+																		</p>
 																	) : (
 																		categories.map((category) => (
-																			<div key={category.id} className="rounded-xl bg-[var(--color-bg-card)]/80 px-3 py-2">
-																			<div className="flex items-center justify-between gap-3">
-																				<LocalizedClientLink
-																					href={`/categories/${category.handle}`}
-																					onClick={() => setIsMobileMenuOpen(false)}
-																					className="font-ui text-sm font-medium text-[var(--color-text)]"
-																				>
-																					{category.name}
-																				</LocalizedClientLink>
-
-																				{category.category_children && category.category_children.length > 0 && (
-																					<button
-																						type="button"
-																						onClick={() => toggleMobileCategory(category.id)}
-																						aria-label={`Toggle ${category.name} subcategories`}
-																						className="inline-flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-text)]/70 transition hover:bg-black/5"
-																					>
-																						<ChevronDown
-																							className={cn(
-																								"h-4 w-4 transition-transform duration-200",
-																								expandedMobileCategories.has(category.id) && "rotate-180"
-																							)}
-																						/>
-																					</button>
-																				)}
-																			</div>
-
-																			{category.category_children &&
-																				category.category_children.length > 0 &&
-																				expandedMobileCategories.has(category.id) && (
-																					<div className="mt-2 flex flex-wrap gap-2">
-																						{category.category_children.map((subCategory) => (
-																							<LocalizedClientLink
-																								key={subCategory.id}
-																								href={`/categories/${subCategory.handle}`}
-																								onClick={() => setIsMobileMenuOpen(false)}
-																								className="rounded-full border border-border px-2.5 py-1 font-ui text-xs text-muted transition hover:border-primary/40 hover:text-[var(--color-text)]"
-																							>
-																								{subCategory.name}
-																							</LocalizedClientLink>
-																						))}
+																			<div
+																				key={category.id}
+																				className="rounded-2xl border border-border bg-[var(--color-bg)] p-4"
+																			>
+																				<div className="flex items-start justify-between gap-3">
+																					<div>
+																						<LocalizedClientLink
+																							href={`/categories/${category.handle}`}
+																							onClick={() => setIsMobileMenuOpen(false)}
+																							className="font-ui text-base font-medium text-[var(--color-text)]"
+																						>
+																							{category.name}
+																						</LocalizedClientLink>
 																					</div>
-																				)}
-																		</div>
+
+																					{category.category_children && category.category_children.length > 0 && (
+																						<button
+																							type="button"
+																							onClick={() => toggleMobileCategory(category.id)}
+																							aria-label={`Toggle ${category.name} subcategories`}
+																							className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-[var(--color-bg-card)] text-[var(--color-text)] transition hover:border-primary"
+																						>
+																							<ChevronDown
+																								className={cn(
+																									"h-4 w-4 transition-transform duration-200",
+																									expandedMobileCategories.has(category.id) && "rotate-180"
+																								)}
+																							/>
+																						</button>
+																					)}
+																				</div>
+
+																				{category.category_children &&
+																					category.category_children.length > 0 &&
+																					expandedMobileCategories.has(category.id) && (
+																						<div className="mt-3 flex flex-wrap gap-2">
+																							{category.category_children.map((subCategory) => (
+																								<LocalizedClientLink
+																									key={subCategory.id}
+																									href={`/categories/${subCategory.handle}`}
+																									onClick={() => setIsMobileMenuOpen(false)}
+																									className="rounded-full border border-border bg-[var(--color-bg-card)] px-3 py-1.5 font-ui text-xs text-muted transition hover:border-primary hover:text-[var(--color-text)]"
+																								>
+																									{subCategory.name}
+																								</LocalizedClientLink>
+																							))}
+																						</div>
+																					)}
+																			</div>
 																		))
 																	)}
 
 																	<LocalizedClientLink
 																		href="/categories"
 																		onClick={() => setIsMobileMenuOpen(false)}
-																		className="block px-1 pt-1 font-ui text-sm font-medium text-primary"
+																		className="block rounded-2xl border border-border bg-[var(--color-surface)] px-4 py-3 font-ui text-sm font-medium text-primary"
 																	>
 																		View all categories
 																	</LocalizedClientLink>
@@ -601,24 +623,27 @@ export default function Navbar() {
 											<LocalizedClientLink
 												key={item.label}
 												href={item.href}
+												onClick={() => setIsMobileMenuOpen(false)}
 												className={cn(
-													"block rounded-lg px-3 py-3 font-ui text-base transition",
+													"flex items-center justify-between rounded-[24px] border p-4 transition",
 													isActive
-														? "bg-primary/15 text-[var(--color-text)]"
-														: "text-[var(--color-text)]/90 hover:bg-black/5"
+														? "border-primary bg-[var(--color-bg-card)] text-[var(--color-text)]"
+														: "border-border bg-[var(--color-bg-card)] text-[var(--color-text)] hover:border-primary"
 												)}
 											>
-												{item.label}
+												<div>
+													<p className="font-ui text-lg font-medium">{item.label}</p>
+												</div>
+												{isActive && (
+													<span className="inline-flex h-2.5 w-2.5 rounded-full bg-primary" />
+												)}
 											</LocalizedClientLink>
 										)
 									})}
 								</nav>
 
-								<div className="mt-8 border-t border-border pt-6">
-									<p className="font-ui text-xs uppercase tracking-[0.14em] text-muted">
-										Follow us
-									</p>
-									<div className="mt-3 flex items-center gap-2">
+								<div className="mt-6 rounded-[28px] border border-border bg-[var(--color-bg-card)] p-4 shadow-[0_12px_32px_rgba(44,44,44,0.06)]">
+									<div className="flex items-center gap-3">
 										{SOCIAL_LINKS.map(({ label, href, Icon }) => (
 											<a
 												key={label}
@@ -626,15 +651,15 @@ export default function Navbar() {
 												target="_blank"
 												rel="noreferrer"
 												aria-label={label}
-												className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-[var(--color-text)] transition hover:border-primary hover:text-primary"
+												className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-[var(--color-bg)] text-[var(--color-text)] transition hover:border-primary hover:text-primary"
 											>
 												<Icon className="h-4 w-4" />
 											</a>
 										))}
 									</div>
 								</div>
-							</motion.aside>
-						</>
+							</div>
+						</motion.aside>
 					)}
 				</AnimatePresence>
 			</header>

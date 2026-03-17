@@ -576,28 +576,6 @@ Design:
 
 ---
 
-### 🔷 Section 11 — UGC / Instagram Gallery
-
-**Prompt:**
-```
-Build an `InstagramGallery` static mosaic component.
-
-Layout: 3×2 grid on desktop, 2×3 on tablet, 2×N on mobile
-6 tiles: mix of square and slightly taller images
-
-Each tile:
-- On hover: overlay with @username, heart icon, and "Shop This Look →" text
-- Overlay background: semi-transparent var(--color-primary) gradient
-- Smooth scale + opacity transition
-
-Section header: "Tag us @glowhausbd" + Instagram icon
-Sub: "Show us your glow routine"
-
-Note: Images are static/placeholder — add a CMS or Instagram API integration note in comments
-```
-
----
-
 ### 🔷 Section 12 — Reviews / Testimonials
 
 **Prompt:**
@@ -865,7 +843,6 @@ src/
 │   │   ├── TrendingNow.tsx
 │   │   ├── EditorialSection.tsx
 │   │   ├── SkinConcernFinder.tsx
-│   │   ├── InstagramGallery.tsx
 │   │   ├── Testimonials.tsx
 │   │   ├── TrustBadges.tsx
 │   │   └── NewsletterSection.tsx
