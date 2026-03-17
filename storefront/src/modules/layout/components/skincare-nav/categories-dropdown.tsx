@@ -1,14 +1,12 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
 
 export default function CategoriesDropdown() {
   const [categories, setCategories] = useState<HttpTypes.StoreProductCategory[]>([])
-  const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -30,33 +28,11 @@ export default function CategoriesDropdown() {
     fetchCategories()
   }, [])
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false)
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [])
-
-  const toggleDropdown = (e: React.MouseEvent) => {
-    e.preventDefault()
-    setIsOpen(!isOpen)
-  }
-
   return (
-    <div ref={dropdownRef} className="relative">
+    <div className="relative group">
       {/* Categories Button */}
-      <button
-        onClick={toggleDropdown}
+      <LocalizedClientLink
+        href="/categories"
         className="font-sans text-[11px] uppercase tracking-[1.5px] text-[#2E1F14]/70 hover:opacity-100 transition flex items-center gap-1"
       >
         Categories
@@ -66,9 +42,7 @@ export default function CategoriesDropdown() {
           viewBox="0 0 24 24"
           strokeWidth={1.5}
           stroke="currentColor"
-          className={`w-3 h-3 transition-transform duration-300 ${
-            isOpen ? "rotate-180" : ""
-          }`}
+          className="w-3 h-3 transition-transform duration-300 group-hover:rotate-180"
         >
           <path
             strokeLinecap="round"
@@ -76,15 +50,11 @@ export default function CategoriesDropdown() {
             d="m19.5 8.25-7.5 7.5-7.5-7.5"
           />
         </svg>
-      </button>
+      </LocalizedClientLink>
 
       {/* Dropdown Menu */}
       <div
-        className={`absolute left-0 top-full mt-0 w-56 bg-white border border-[#D4B89A]/20 rounded-lg shadow-lg transition-all duration-200 origin-top z-50 ${
-          isOpen
-            ? "opacity-100 visible scale-y-100"
-            : "opacity-0 invisible scale-y-95"
-        }`}
+        className="absolute left-0 top-full mt-0 w-56 bg-white border border-[#D4B89A]/20 rounded-lg shadow-lg transition-all duration-200 origin-top opacity-0 invisible scale-y-95 group-hover:opacity-100 group-hover:visible group-hover:scale-y-100"
         style={{
           transformOrigin: "top",
         }}
@@ -102,29 +72,25 @@ export default function CategoriesDropdown() {
             {categories.map((category) => (
               <div key={category.id}>
                 {/* Main Category */}
-                <button
-                  onClick={() => {
-                    window.location.href = `/categories/${category.handle}`
-                  }}
-                  className="w-full text-left px-4 py-2 text-sm text-[#2E1F14] hover:bg-[#FAF6F0] transition"
+                <LocalizedClientLink
+                  href={`/categories/${category.handle}`}
+                  className="block px-4 py-2 text-sm text-[#2E1F14] hover:bg-[#FAF6F0] transition"
                 >
                   <span className="font-medium">{category.name}</span>
-                </button>
+                </LocalizedClientLink>
 
                 {/* Subcategories */}
                 {category.category_children &&
                   category.category_children.length > 0 && (
                     <div className="bg-[#FAF6F0]/50 pl-8">
                       {category.category_children.map((subcat) => (
-                        <button
+                        <LocalizedClientLink
                           key={subcat.id}
-                          onClick={() => {
-                            window.location.href = `/categories/${subcat.handle}`
-                          }}
-                          className="w-full text-left px-4 py-1.5 text-xs text-[#2E1F14]/70 hover:text-[#C9877A] hover:bg-white/50 transition"
+                          href={`/categories/${subcat.handle}`}
+                          className="block px-4 py-1.5 text-xs text-[#2E1F14]/70 hover:text-[#C9877A] hover:bg-white/50 transition"
                         >
                           {subcat.name}
-                        </button>
+                        </LocalizedClientLink>
                       ))}
                     </div>
                   )}
@@ -136,14 +102,12 @@ export default function CategoriesDropdown() {
         {/* Footer Link */}
         {categories.length > 0 && (
           <div className="border-t border-[#D4B89A]/20 py-2">
-            <button
-              onClick={() => {
-                window.location.href = "/categories"
-              }}
-              className="w-full text-left px-4 py-2 text-xs text-[#C9877A] hover:text-[#2E1F14] transition font-medium"
+            <LocalizedClientLink
+              href="/categories"
+              className="block px-4 py-2 text-xs text-[#C9877A] hover:text-[#2E1F14] transition font-medium"
             >
               View All Categories →
-            </button>
+            </LocalizedClientLink>
           </div>
         )}
       </div>
